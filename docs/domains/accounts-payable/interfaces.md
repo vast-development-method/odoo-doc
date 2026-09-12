@@ -50,7 +50,8 @@ Empty-state texts:
 | **Register Payment** | the document is posted and unpaid |
 | **Set as Reviewed** | the document is posted and not yet reviewed; restricted to the accountant group |
 | **Add Credit Note** / **Reverse** | the document is posted |
-| **Add Debit Note** | *(Debit Notes package.)* the document is posted |
+| **Add Debit Note** | *(Debit Notes package.)* placed immediately after the reverse button; restricted to the invoicing group; hidden unless the status is `posted` **and** the type is one of `out_invoice`, `in_invoice`, `out_refund`, `in_refund`; keyboard shortcut *shift + d*. It opens the *Create Debit Note* dialogue |
+| **Debit Notes** smart button | *(Debit Notes package.)* a statistic button in the button box, drawn with the *plus* icon, showing the count of debit notes raised against this document above the caption *Debit Notes*; **hidden when that count is zero**. Pressing it opens the *Debit Notes* window action listing the documents whose debit origin is this one |
 | Status bar | draft → posted; the secured variant of the widget is shown to the inalterability group |
 
 ### 2.2 Banners, in display order
@@ -84,6 +85,7 @@ Empty-state texts:
 | Incoterm and Incoterm Location | other information | hidden on receipts |
 | Deductibility (`deductible_amount`) column | line list | shown to the partial-purchase-deductibility group |
 | Journal, currency, currency rate, fiscal position, cash rounding | other information | |
+| **Original Invoice Debited** (`debit_origin_id`) | *(Debit Notes package.)* other information, immediately after the origin field (`invoice_origin`) | read-only; **hidden when empty**, so it appears only on a document that is itself a debit note |
 | **Total (Tax inc.)** | totals block | quick encoding only |
 | Amount in words | totals block | |
 
@@ -124,6 +126,14 @@ On the journal-item search view the **To Review** filter reads *the document's r
 A separate primary search view adds **Irregular Sequences**: documents that made a gap, **or** that are draft or cancelled with a non-zero sequence number and a number other than `/`.
 
 On the journal-item list a **Bills** filter exists, defined as *amount due is below zero*, visible only when the journal type in the context is `purchase`.
+
+**Debit-note filters.** *(Debit Notes package.)* Three filters are added, all selecting documents that carry a debit origin:
+
+| Search view | Filter label | Placed after | Condition |
+|---|---|---|---|
+| the journal-entry search view | **Debit Note** | the *Reversed* filter | the debit origin is set |
+| the invoice and bill search view | **Debit Notes** | the *Credit Notes* / *Refunds* filter, and is itself followed by a separator | the debit origin is set |
+| the journal-item search view | **Debit Note** | the *Unreconciled* filter | the parent document's debit origin is set |
 
 ### 3.3 The bill upload list
 
@@ -263,7 +273,8 @@ These are the operations a client or an integration may call. Inputs are the rec
 | Currency rate lookup | a company, a currency, a date | The conversion rate from the company currency to that currency at that date |
 | Refresh currency rate | the documents | Resets the document rate to the expected one |
 | Create documents from attachments | a list of attachments; optionally a grouping method | The created documents |
-| Extend with attachments | one document, a list of file-data records, a newly-created flag | True when at least one document was decoded |
+| Extend with attachments | one document, a list of file-data records, a newly-created flag | True when at least one document was decoded. Its full contract, including the marking of imported lines, the purchase-order linking attempt, the subscriber notification and the post-processing hook, is `workflows.md` §5 |
+| Post-process the link to a purchase order | one document | Called unconditionally at the close of the decoding contract, after the purchase-order matching attempt and whether or not an order was found. The base package's implementation does nothing and answers nothing; companion packages extend it |
 
 ### 6.2 On the Journal
 
@@ -297,10 +308,18 @@ These are the operations a client or an integration may call. Inputs are the rec
 
 ### 6.5 Server actions
 
+A server action is an entry the client offers in the action menu of a record or of a selection of records. Each is bound to one entity, offered on the view types listed, and hidden from users outside the groups listed (an action with no group is offered to everyone who may reach the record).
+
 | Name | Bound to | Views | Groups | Effect |
 |---|---|---|---|---|
 | Print Checks | Payment | list, kanban | Accountant | Calls the cheque printing operation on the selection when it is not empty |
 | Confirm Entries | Journal Entry | list, kanban | Invoicing | Calls the confirm-with-dialogue operation on the selection |
+| Review Entries | Journal Entry | list, kanban | Accountant | Calls the *Check selected* operation of §6.1 on the entity, which reads the documents named in the context and marks them reviewed |
+| Switch into invoice/credit note | Journal Entry | form | Invoicing | Calls the *Switch type* operation of §6.1 on the selection, and does nothing when the selection is empty |
+| Pay | Journal Entry | form | Invoicing | Calls the *Force register payment* operation of §6.1 on the selection, and does nothing when the selection is empty |
+| (Un)Block Payment | Journal Entry | form | Invoicing | Calls the *Toggle payment block* operation of §6.1 on the selection |
+| Share | Journal Entry | form | none — offered to every user who may reach the document | Calls the share operation, which produces a shareable link to the document |
+| Create Debit Note | Journal Entry | list, kanban | none — the dialogue itself refuses what may not be debited | *(Debit Notes package.)* Opens the *Create Debit Note* dialogue on the selection. It is a window action rather than a code action, but it is offered in the same action menu |
 
 ---
 
@@ -327,7 +346,33 @@ The portal counters expose `invoice_count` (the three outbound sale types) and `
 |---|---|---|
 | Invoice | the invoice report definition | The document section by section. On a purchase document it is used mainly for self-billing. Its data contains the documents, the quick-response-code payment links when the company enables them, and the report type. A separate definition adds the payment lines |
 | Cheque | the layout named by the company or journal setting | The base package ships **no** layout; each country package adds one. The data handed to it is the page structure of `calculations.md` §14.6: the cheque number, whether numbering is manual, the formatted date, the payee partner and name, the company name, the currency, the payment status, the formatted amount (or `VOID` after page one), the filled amount in words (or `VOID`), the memo, the cropped flag, and the stub lines. Margins and the date caption come from the company settings |
-| Debit note section | *(Debit Notes package.)* an extension of the invoice report | Adds the link back to the debited document |
+| Debit note titles and date caption | *(Debit Notes package.)* an extension of the invoice report definition | Replaces the six document-title texts and the bill-date caption when the document carries a debit origin. Detailed in §8.1. It adds **no** link back to the debited document: the debit origin is shown on the form (§2.3) and never on the printed document |
+
+### 8.1 The debit-note overrides of the printed document
+
+*(Debit Notes package.)* The extension replaces the six title texts of the invoice report definition. Each replacement keeps the original text when the document carries **no** debit origin, and substitutes the debit-note text when it does:
+
+| Title slot | Text when the document has no debit origin | Text when the document carries a debit origin |
+|---|---|---|
+| the ordinary title | *Invoice* | *Debit Note* |
+| the draft title | *Draft Invoice* | *Draft Debit Note* |
+| the cancelled title | *Cancelled Invoice* | *Cancelled Debit Note* |
+| the proforma title | *Proforma Invoice* | *Proforma Debit Note* |
+| the draft proforma title | *Draft Proforma Invoice* | *Draft Proforma Debit Note* |
+| the cancelled proforma title | *Cancelled Proforma Invoice* | *Cancelled Proforma Debit Note* |
+
+Which of the six is used is decided by the base report definition (status of the document and whether a proforma rendering was asked for); the extension only changes the words.
+
+The **date caption** in the date block is replaced as well, but only in the branch that serves a customer invoice:
+
+| Condition | Caption printed |
+|---|---|
+| type is `out_invoice` **and** the document carries a debit origin | *Debit Note Date* |
+| type is `out_invoice` **and** the document carries no debit origin | *Invoice Date* |
+| every other type, debit origin or not | the caption of the base report definition, unchanged |
+
+**Compatibility finding.** A debit note raised from a vendor bill is of type `in_invoice`, so the substituted branch never applies to it: a printed payable debit note keeps the base report's caption for a purchase document even though its title reads *Debit Note*. Recorded as observed. A corrected behaviour would test the debit origin independently of the document type, so that the caption reads *Debit Note Date* on every document carrying a debit origin.
+
 
 ---
 
@@ -341,7 +386,7 @@ The portal counters expose `invoice_count` (the three outbound sale types) and `
 | *Self-billing credit note: Sending* | when every selected document is a vendor credit note in a self-billing journal |
 | *Payment: Payment Receipt* | payment acknowledgements |
 | *New eInvoices Notification* | notifies the journal's notification addresses of received electronic documents |
-| *Journal Notification* | the journal subscriber notification |
+| *Journal Notification* | The journal-subscriber notification. It is sent when a **newly created** purchase document has just been through the decoding contract — see `workflows.md` §5, closing steps — and only when the journal carries at least one notification address. One copy is sent per address, each with its own unsubscribe link pointing at the unsubscribe route of §7, and each carrying a copy of every attachment of the document and of the decoded group, renamed with the prefix `MAIL_` (see `workflows.md` §5). Its subject is the company name, a space, a dash, a space, then *New invoice in «the journal's display name» journal* |
 | the mail-gateway failure body | rendered into the bounce sent when a message reaches a journal address **without** any attachment. Its text is: *Hi,* / *Your email has been discarded. the e-mail address you have used only accepts new invoices:* / a list with *For new invoices, please ensure a PDF or electronic invoice file is attached* and *To add information to a previously sent invoice, reply to your "sent" email* / *For any other question, write to «the company electronic mail address».* / a dash separator / the company name |
 
 ### 9.1 Chatter notifications produced by this domain
@@ -362,6 +407,20 @@ The portal counters expose `invoice_count` (the three outbound sale types) and `
 The creation subtype for a **sale** document is the dedicated "invoice created" subtype; purchase documents use the generic one. The payment-status subtype fires when the status becomes `paid`; the validation subtype fires only for **sale** documents.
 
 Field tracking on a purchase document covers: the number, the vendor reference, the accounting date, the status, the type, the partner, the recipient bank account, the currency, the payment reference, the payment status, the reviewed flag, the untaxed amount, the total, the salesperson and the origin. Every tracked change is recorded as a notification message, and those messages are what the restrictive audit trail protects.
+
+### 9.2 Recipient groups of a chatter notification on a purchase document
+
+When a message is posted on a document whose type is **not** `entry` — which includes every vendor bill, vendor credit note and purchase receipt — the recipients of that message are split into groups, and each group decides what the notification mail shows. Before the ordinary groups, one further group is inserted **at the head of the list**, so that it claims its members before any other group can:
+
+| Group | Membership predicate | What the member receives |
+|---|---|---|
+| additional intended recipient | the partner is among the recipients named on the message, **and** is not the document's own partner, **and** is not of the internal-user kind | the notification carries a button leading to the document's portal page, addressed with the document's access token |
+
+Two consequences matter and are stated as access rules in `business-rules.md` §20:
+
+1. Reaching this code path **generates the document's portal access token** if it did not exist yet, for every document that is not a miscellaneous entry, whether or not any partner ends up in the group.
+2. Adding an extra recipient to a chatter message on a vendor bill therefore **grants that recipient tokenised access to the bill**, without any further permission step.
+
 
 ---
 

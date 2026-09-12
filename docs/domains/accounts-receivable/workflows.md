@@ -150,7 +150,10 @@ to the total, and a payment status of "not paid".
      and the template's static attachments. Attachments already linked are protected from deletion.
 3. Alerts are computed. A "danger" alert blocks: its message is raised.
 4. The user may edit the recipients, the subject, the body, add attachments, or save the body as a
-   new mail template.
+   new mail template. The save-as-template path is a dialogue of its own, titled "Create a Mail
+   Template", which prompts for a template name, creates the template from the current subject and
+   body, selects it on the sending wizard and returns to the sending dialogue; its seven steps, its
+   refusal message and its two dialogue sizes are in [`interfaces.md`](interfaces.md) section 14.2.
 5. The user presses **Send**. The platform:
    1. raises any danger alert;
    2. remembers the chosen layout as the partner's default when the partner had none;
@@ -168,7 +171,11 @@ to the total, and a payment status of "not paid".
 1. The user selects several documents and presses **Send**. The batch wizard opens.
 2. It shows a **summary**: for each channel and each extra electronic delivery, how many of the
    selected documents would use it, using each document's own defaults. There is nothing to choose:
-   every document uses its own partner's settings.
+   every document uses its own partner's settings. The summary is a map from the channel or delivery
+   key to a pair of a count and a label; each extra delivery's label is prefixed with the word "by "
+   and a space, and the manual channel's ordinary label is replaced by "Manually", because in batch
+   mode everything is produced asynchronously and nothing is handed to the user for download. The
+   exact rules are in [`entities.md`](entities.md) section 8.2.
 3. Alerts are computed over the whole selection; a danger alert blocks.
 4. On confirmation, unless the caller forces the synchronous mode:
    - the sending background job must be active, otherwise the operation is refused (with a link to
@@ -261,13 +268,26 @@ message with its attachments.
    - the payment status is not paid, in payment or partially paid;
    - there is no pending or authorised transaction from a real provider.
 
-   When any of these fails, the page explains why, using the applicable sentences among:
-   > This invoice cannot be paid online.
-   > There is no amount to be paid.
-   > This invoice isn't posted.
-   > This invoice has already been paid.
-   > This is not an outgoing invoice.
-   > There are pending transactions for this invoice.
+   When any of these fails, the page explains why. The explanation is built by testing six
+   conditions **independently and in this order**, appending one sentence per condition that holds,
+   and joining the collected sentences with line breaks. The conditions are not the negations of the
+   eligibility bullets above; they are their own tests:
+
+   | Order | Condition that appends the sentence | Sentence |
+   | --- | --- | --- |
+   | 1 | the system parameter that enables portal payment is off | This invoice cannot be paid online. |
+   | 2 | at least one linked transaction is pending, authorised or done, **or** the residual is zero in the document currency | There is no amount to be paid. |
+   | 3 | the status is not posted | This invoice isn't posted. |
+   | 4 | the residual is zero in the document currency | This invoice has already been paid. |
+   | 5 | the document type is not `out_invoice` (Customer Invoice) | This is not an outgoing invoice. |
+   | 6 | at least one linked transaction is pending or authorised **and** comes from a provider other than the two built-in ones (the do-nothing provider and the custom provider) | There are pending transactions for this invoice. |
+
+   Two consequences are worth stating, because they are not what the eligibility list suggests.
+   First, the second condition fires as soon as **any** pending, authorised or done transaction
+   exists, even on a partly paid invoice that still owes money, so a customer who paid one instalment
+   online is told "There is no amount to be paid." while the residual is plainly positive. Second,
+   conditions two and four both fire on a fully settled invoice, so a paid invoice collects two
+   sentences, not one.
 
 5. The payment form is built with: the compatible providers for the company, the partner and the
    amount; the compatible payment methods; the customer's saved tokens; whether the partner's company
@@ -280,7 +300,12 @@ message with its attachments.
    amount redirects to the portal home.
 7. The customer confirms. The payment providers domain creates a transaction, and on success creates
    an accounting payment and reconciles it with the document — see
-   [`../payment-providers/workflows.md`](../payment-providers/workflows.md).
+   [`../payment-providers/workflows.md`](../payment-providers/workflows.md) for the transaction
+   lifecycle and
+   [`../payments-and-bank-reconciliation/workflows.md`](../payments-and-bank-reconciliation/workflows.md)
+   for the payment and its reconciliation. What crosses the boundary back into this domain is
+   listed in [`state-machines.md`](state-machines.md) section 1.3 (a done transaction posts a draft
+   customer invoice) and in [`accounting-effects.md`](accounting-effects.md) section 6.5.
 8. **Overdue batch payment.** The address `/my/invoices/overdue` collects every overdue customer
    invoice of the signed-in customer and offers one payment for the lot. All of them must share the
    partner, the company and the currency; otherwise the page fails with, respectively:
@@ -362,12 +387,19 @@ still has to review and post; for the cancelling paths, posted documents already
 a customer credit note, a vendor bill or a vendor credit note, and is not already the source of a
 debit note.
 
-1. The user chooses **Create Debit Note**. The wizard opens with the reason, the date (today), the
-   "copy lines" option (hidden when the source is a credit note) and the journal, restricted to
-   journals of the kind implied by the source type.
+1. The user chooses **Create Debit Note**, either from the header button of a posted document or
+   from the action menu of a list or kanban selection. The dialogue, titled "Create Debit Note",
+   opens with the reason, the date (today), the "copy lines" option and the journal. The journal
+   selector is restricted to journals whose kind is the one implied by the sources' common type —
+   purchase when that common type is a vendor bill or a vendor credit note, sale in every other case,
+   **including** the case where the selected sources have mixed types and therefore no common type.
+   The "copy lines" checkbox is hidden when the common type is a credit note, but hiding it does not
+   force it to false, and it reappears as soon as the selection has mixed types.
 2. On confirmation, one document per source is created with the defaults of
-   [`accounting-effects.md`](accounting-effects.md) section 5; the lines are copied only when the
-   option is on and the source is not a credit note.
+   [`accounting-effects.md`](accounting-effects.md) section 5. The lines of the source are copied
+   whenever the "copy lines" option is on, and cleared whenever it is off — the source's type does
+   not enter into it. In particular a credit-note source with the option on **does** copy its lines;
+   see the compatibility finding in [`accounting-effects.md`](accounting-effects.md) section 5.
 3. A note is written on the source: "This debit note was created from: *(a link)*".
 4. The produced documents are opened: the form when there is one, the list otherwise.
 

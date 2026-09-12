@@ -119,7 +119,15 @@ partner, and the default values the caller supplied.
 
 For a **plain journal entry** and for cost-of-goods-sold lines, the copied lines' balances and
 amounts in currency are negated line by line, and the storno flag is flipped when the company uses
-storno accounting; the dynamic line synchronisation is suppressed so the copy is exact.
+storno accounting.
+
+**Whether the dynamic line synchronisation runs during the copy depends on the source type.** It is
+suppressed when the source is a plain journal entry, so that entry's copy is exact, line for line;
+it runs normally when the source is an invoice, so the copy rebuilds its tax lines, its discount
+allocation lines, its cash rounding line, its early payment discount lines and its payment term
+lines from the copied product lines. In the cancelling variant of section 4.2 the negation pass that
+follows the copy is additionally performed with the synchronisation suppressed, so that negating the
+lines of a plain entry does not immediately trigger a rebuild.
 
 For an **invoice**, no negation is applied: the copy is a document of the opposite type, and the
 direction sign of that type already puts every line on the opposite side.
@@ -138,11 +146,35 @@ direction sign of that type already puts every line on the opposite side.
 | Auto-post | `at_date` when the reversal date is in the future, otherwise `no` |
 | Origin | copied from the source |
 | Recipient bank account | cleared, then recomputed |
+| Partner | **forced to the source's partner**, overriding anything the caller supplied. The reversal routine writes it into the default values together with the reversed-entry link and the mapped document type, after the wizard's own defaults, so it always wins. This matters beyond the customer name on the credit note: the partner is what selects the receivable account of the credit note's payment term line, so a credit note can never be booked against a different customer's receivable account than the invoice it reverses. |
+| Reversal of | the source document |
+| Type | the reverse of the source type, per the map in [`entities.md`](entities.md) section 1.3 |
 
 ### 4.2 The cancelling reversal
 
-When the reversal is asked to *cancel* the source (this happens for plain journal entries and in the
-"reverse and create invoice" mode, and only when the reversal is not future-dated):
+When the reversal is asked to *cancel* the source, which happens in the two cases below and only when
+the reversal is not future-dated:
+
+- the **"reverse and create invoice"** mode, whatever the sources are; or
+- the wizard's computed document type is exactly `entry` (Journal Entry).
+
+That second condition is narrower than "the sources are plain journal entries", because the wizard's
+document type is filled from the sources only when **exactly one** source is selected. With two or
+more sources it is filled with the literal `some_invoice` when any of them is a customer invoice or a
+vendor bill, and left empty otherwise — never with `entry`.
+
+> **Compatibility finding.** Reversing several plain journal entries in one run of the plain
+> **Reverse** button therefore performs no cancellation at all: the reconciliations of the sources
+> are not removed, the reverses are left in draft instead of being posted immediately, and source and
+> reverse are not reconciled against each other. Reversing the same entries one at a time cancels
+> each of them. The observed behaviour is recorded here because a rebuild that "fixes" it silently
+> would change the ledger a batch reversal produces. A corrected behaviour would decide the
+> cancellation per source document, from that document's own type, rather than from the single
+> wizard-level type, so that a batch of plain entries behaves exactly like the same entries reversed
+> individually. The multi-source case of a plain journal entry is specified in
+> [`../general-ledger/workflows.md`](../general-ledger/workflows.md).
+
+In the cases where it does apply:
 
 1. Every reconciliation on the source's lines is first removed.
 2. The reverse documents are created as above.
@@ -214,7 +246,28 @@ matching invoice type), linked to the source.
 | Journal | the chosen journal, else the source's journal |
 | Payment terms | cleared |
 | Original invoice debited | the source |
-| Lines | copied from the source when the "copy lines" option is on; cleared otherwise. They are always cleared when the source is a credit note. |
+| Lines | copied from the source when the "copy lines" option is on; cleared otherwise. The source's document type plays no part in this decision. |
+| Type | the type of the table above |
+
+**The rule on the lines, stated exactly.** The lines of the copy are cleared **if and only if** the
+"copy lines" option is off. When it is on, the lines are copied, whatever the source's type is —
+including a customer credit note or a vendor credit note. What the interface does is narrower than
+that: the dialogue *hides* the "copy lines" checkbox when the sources have one common type and that
+type is a credit note. Hiding a checkbox does not force it to false, and the checkbox is not hidden
+when the selected sources have mixed types, because then there is no common type to test. So a user
+who selects a customer invoice and a customer credit note together sees the checkbox, may tick it,
+and gets a debit note with copied lines from the credit note as well.
+
+> **Compatibility finding.** The intent recorded in the option's own help text is different: it says
+> the lines will not be copied for a debit note made from a credit note. The intended second half of
+> the guard — "or the source is a credit note" — is written in a form that can never hold, because it
+> compares the source's document type against a collection that contains a pair of type names rather
+> than the two type names themselves, and a single type name is never equal to a pair. The guard
+> therefore reduces to "the copy-lines option is off". The observed behaviour is the one specified
+> above and is what a compatible rebuild must reproduce. A corrected behaviour would test the source
+> type against the two credit-note types individually, so that a credit-note source never copies its
+> lines, and would additionally force the checkbox to false rather than merely hiding it, so that the
+> mixed-type selection behaves the same way.
 
 **Numbering.** When the journal has a dedicated debit note sequence, debit notes are numbered among
 themselves and their starting number is prefixed with `D` (see
@@ -349,6 +402,31 @@ reconciliation reverses it. The full specification belongs to
 [`../taxes/accounting-effects.md`](../taxes/accounting-effects.md); what the receivable domain
 contributes is the flag *always tax exigible*, which is true exactly when the document has no
 receivable or payable line and therefore no deferral is possible.
+
+### 6.5 Settlement through an online payment transaction
+
+A customer who pays from the portal settles the document through a payment transaction rather than
+through the register-payment wizard. The ledger consequence is the same as section 6.1 — a payment is
+created and reconciled against the receivable line — but the records that lead to it are different,
+and the order is fixed. The sequence, its guards and the three cases in which no payment is created
+are in [`state-machines.md`](state-machines.md) section 1.9.
+
+| Item of the resulting entry | Rule |
+| --- | --- |
+| Journal | the bank journal named by the provider's payment journal field ([`entities.md`](entities.md) section 13.1). |
+| Direction | inbound when the transaction amount is positive, outbound when it is negative. |
+| Amount | the absolute value of the transaction amount, in the transaction's currency. A transaction may carry a negative amount; a payment may not, so the sign is expressed as the direction instead. |
+| Counterparty | the commercial entity of the transaction's partner, with the customer partner kind. |
+| Company | the provider's company. |
+| Payment method line | the inbound payment method line of that journal whose provider is this provider — the line kept in step by the rule of [`entities.md`](entities.md) section 13.2. |
+| Outstanding account | the outstanding account of that payment method line, chosen when the line was created by the rule of [`entities.md`](entities.md) section 13.3. |
+| Memo | the transaction reference, then " - ", then the provider's own reference for the transaction (empty when the provider gave none). |
+| Reconciled against | the receivable lines of the documents the transaction is linked to. |
+| Write-off | none: the payment is created with an empty write-off list, so an amount smaller than the residual leaves the document partially paid rather than closing it. |
+
+The journal items themselves — the outstanding-account item and the receivable item — are exactly
+those of section 6.1, and the payment entity that carries them belongs to
+[`../payments-and-bank-reconciliation/accounting-effects.md`](../payments-and-bank-reconciliation/accounting-effects.md).
 
 ---
 

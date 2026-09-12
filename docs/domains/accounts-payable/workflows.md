@@ -31,15 +31,27 @@ Roles used here:
 3. The clerk types the supplier's own number into **Vendor Reference**. The duplicate set is re-evaluated; see §7.
 4. The clerk sets the **Bill Date**. The accounting date is recomputed from it by `calculations.md` §2.3, and, when the recomputation moves it, the line dates and the document number are scheduled for recomputation.
 5. The clerk adds **lines**. For each line with a product, the label, unit, unit price, taxes and expense account default as in `calculations.md` §9. For a line without a product the account falls back to the most frequent account of this vendor, then to the neighbours' account, then to the journal's default account.
-6. At each save the **dynamic lines** are rebuilt in this order:
+6. Instead of typing the lines, or in addition to them, the clerk may use the **Auto-Complete** picker (`invoice_vendor_bill_id`, labelled *Vendor Bill*), which offers earlier bills and vendor credit notes of the same company. It is a transient control: it stores nothing, and it is company-checked, so only documents of the current document's company are offered. Choosing one performs, in this order:
+   1. **Appends** to the current document a copy of **every product, section, subsection and note line** of the chosen document. Nothing already present is replaced and nothing is cleared, so choosing a second document appends a second batch, and choosing the same document twice appends its lines twice.
+   2. Overwrites the current document's **currency** with the chosen document's currency.
+   3. Overwrites the current document's **fiscal position** with the chosen document's fiscal position.
+   4. **Empties the picker again**, so that the control shows nothing and the choice leaves no trace on the document.
+
+   Each copied line is made with the entity's ordinary copy values, so it carries the product, the label, the quantity, the unit, the unit price, the discount, the taxes, the deductibility, the analytic distribution and the imported marker of the line it came from. Two things are dropped: the balance of a product line, which is recomputed from the unit price, and the account and balance of a section, subsection or note line, which such a line may not carry. The links to a purchase order line and to a sales order line are **not** carried over, because the copy is made without the business-field marker.
+
+   Steps 2 and 3 are ordinary writes on the document, so they re-trigger the currency rate recomputation, the fiscal position's tax and account substitution, and therefore the whole dynamic-line rebuild of step 7. **No other header field is taken over**: the vendor, the commercial partner, the bill date, the accounting date, the vendor reference, the payment reference, the payment term, the recipient bank account, the incoterm and the journal all keep the values they had, even when the chosen document has different ones.
+
+   The picker has **no precondition and refuses nothing**. Choosing a vendor credit note copies that credit note's lines onto a bill unchanged, and choosing a document written in another currency simply changes the currency of the current draft.
+7. At each save the **dynamic lines** are rebuilt in this order:
    1. the private-share base lines (when at least one product line has a deductibility below 100 %);
    2. the tax lines, including the non-deductible tax line;
-   3. the cash rounding line;
-   4. the early payment discount lines;
-   5. the **payable term lines**, from the *needed terms* map of `calculations.md` §5.
-7. The **Due Date** shows the latest maturity date produced. Overriding it by hand replaces the term lines with a single line on that date.
-8. The clerk may attach the supplier's file. If an internal user posts it in the chatter, the decoding contract of §5 runs on it.
-9. The clerk posts (§8) or leaves the document in the *To Check* queue (§10).
+   3. the discount-allocation line pairs (when the company names a *Vendor Bills Discounts Account* and a product line carries a discount) — `accounting-effects.md` §2.6;
+   4. the cash rounding line;
+   5. the early payment discount line pairs (when the payment term grants a discount computed in the `mixed` mode) — `accounting-effects.md` §2.7;
+   6. the **payable term lines**, from the *needed terms* map of `calculations.md` §5.
+8. The **Due Date** shows the latest maturity date produced. Overriding it by hand replaces the term lines with a single line on that date.
+9. The clerk may attach the supplier's file. If an internal user posts it in the chatter, the decoding contract of §5 runs on it.
+10. The clerk posts (§8) or leaves the document in the *To Check* queue (§10).
 
 *Postcondition*: a draft purchase document with balanced dynamic lines, or a posted one.
 
@@ -126,6 +138,16 @@ Roles used here:
    - the decoder raises a redirecting warning → it is re-raised so the user gets the offered navigation;
    - the decoder raises anything else → the transaction is rolled back and the document receives, with elevated privileges, the three-part message *Error importing attachment «descriptor»:* / *This specific error occurred during the import:* / the error text.
 
+6. **Mark what the decoder added.** The document's invoice lines are compared with the set that existed before step 4. Every line in the difference receives the **imported** marker. That marker is what protects a decoded line from having its unit price and taxes silently recomputed, and what makes the archived-account refusal skip it at posting.
+7. **Try to link the document to a purchase order — but only when the decoder was the first thing to put lines on it.** When at least one line was added *and* the document carried **no** invoice line before step 4, the purchase-order matching hook of §6 is called on the document, with the document's own type as the default type for anything it creates, and with a **four-second** budget instead of the ten seconds of the manual path. The attempt is guarded: a user error or a value error raised by the matching is written to the technical log as *Failed to link bill to purchase order*, together with the error, and is **not** propagated — the import still succeeds and the document keeps the lines the decoder wrote. Any other kind of failure is not caught here. When the document already had invoice lines before decoding, no linking is attempted at all.
+8. **Notify the journal's subscribers — but only for a newly created document.** When the caller passed the "newly created" flag (that is, on the upload path of §2 and the mailbox path of §3, and not on the enhance-an-existing-document path of §4):
+   1. The document's **portal access token** is generated if it has none, and written to storage immediately, before anything else in this step. The early write is deliberate: the decoding of a scanned document may finish asynchronously and update the same document at any moment, and a token written later could be lost to that concurrent update, which would leave the notification with an unusable link.
+   2. The attachment set to send is assembled: **every attachment of the document**, plus the attachment record of **every file of the decoded group**, plus the attachment record of **every file unwrapped from that group** (the files embedded inside containers). Repetitions are removed, so a file that is both attached and in the group is sent once.
+   3. A **copy** of each of those attachments is made for the mail, with the same media type and the same content, and with a name formed by the five characters `MAIL_` followed by the original name.
+   4. The journal-subscriber notification of `interfaces.md` §9 is sent, carrying those copies. It goes out only if the journal actually carries at least one notification address; otherwise nothing is sent.
+   5. **Any** failure of this whole step — assembling the attachments, copying them, or sending — is written to the technical log and swallowed. The import is never failed because a notification could not be sent.
+9. **Run the post-processing hook.** The document is finally handed to a post-processing hook that runs **unconditionally**: whether or not linking was attempted in step 7, and whether or not an order was found. The base package's hook does nothing; it exists so that a companion package can react to a document that has just been decoded and possibly matched. It is listed among the named operations in `interfaces.md` §6.1.
+
 *Note*: the base package ships **no** decoder. The structured-document packages and the scanning service supply them; see `../electronic-invoicing-and-document-exchange/`.
 
 ---
@@ -135,8 +157,9 @@ Roles used here:
 *Performed by*: the system, when the purchasing package is installed.
 
 1. The origin field of the bill is split on commas and whitespace into a list of references.
-2. The matching hook is called with: that list, the vendor identifier, the document total and a timeout (ten seconds by default). The base package's hook does nothing; the purchasing package implements it.
-3. When the hook finds orders, it links them and completes the bill's lines from the ordered quantities and prices. See `../purchasing/workflows.md`.
+2. The matching hook is called with: that list, the vendor identifier, the document total and a timeout. The timeout is **ten seconds** on this, the manual path. The **decoding path calls the very same hook itself**, at the close of the decoding contract (§5 step 7), and gives it only **four seconds**, because the decoding of an uploaded or mailed-in document must not keep the caller waiting; on that path the call is also made only when the decoder was the first thing to put lines on the document, and a user error or a value error it raises is logged and ignored. The base package's hook does nothing; the purchasing package implements it.
+3. When the hook finds orders, it links them and completes the bill's lines from the ordered quantities and prices. See [`../purchasing/workflows.md`](../purchasing/workflows.md).
+4. Whether or not an order was found, the decoding path then runs the post-processing hook of §5 step 9. The manual path does not.
 
 The decoder of a structured document calls the same hook with the references it read and a flag saying the values came from a scan.
 
@@ -198,7 +221,7 @@ The wizard opens only when **all** of:
 6. it has a vendor;
 7. the vendor's policy is exactly **Ask after 3 validations without edits**;
 8. the company's automatic-validation switch is on;
-9. the document has **not** been manually modified.
+9. the document has **not** been manually modified — the flag, the writes that set it and the five operations that suppress it are in `business-rules.md` §19, and a single programmatic write from another domain is enough to fail this condition.
 
 Then the system counts the consecutive run of unmodified bills: starting at 1 for the current bill, it walks the **ten** most recent other posted purchase documents of the same vendor, newest first by creation date, and adds one for each that was not manually modified, stopping at the first that was. If the run is **fewer than three**, nothing opens.
 
@@ -299,10 +322,11 @@ A worked example including a **partly paid** bill is in `accounting-effects.md` 
 *Performed by*: accountant. *Precondition*: the source documents are posted, are of type `out_invoice`, `in_invoice`, `out_refund` or `in_refund`, and none already has a debit note.
 
 1. From the document list or form, choose **Add Debit Note**. Refusals at this point: *You can only debit posted moves.*; *You can't make a debit note for an invoice that is already linked to a debit note.*; *You can make a debit note only for a Customer Invoice, a Customer Credit Note, a Vendor Bill or a Vendor Credit Note.*
-2. The dialogue asks for the debit note date (default today), a reason, an optional journal and the *Copy Lines* switch.
+2. The dialogue asks for the debit note date (default today), a reason, an optional journal and the *Copy Lines* switch. The switch is **hidden** when the sources share the type `in_refund` or `out_refund`, so a debit note raised from a credit note through the dialogue leaves it at its default of off; what happens when a caller sets it anyway is the compatibility finding in `business-rules.md` §11.
 3. On confirmation, each source is copied with the overrides of `accounting-effects.md` §9. The copy carries the business links of the source (purchase order links and the like).
 4. The user is redirected to the debit note, or to the list of them, with the resulting type as the default for further creation.
-5. The source document shows a *Debit Notes* smart button counting them.
+5. The source document shows a *Debit Notes* smart button counting them; it is hidden while the count is zero (`interfaces.md` §2.1).
+6. The chatter of the **new** document records *This debit note was created from: «link»*, the link naming the source. The source's own chatter records nothing.
 
 ---
 

@@ -135,17 +135,17 @@ When the compatible providers are computed for "Acme North",
 Then the provider is in the result.
 
 **PAY-AC-025. A provider is available in its listed countries.**
-Given a provider whose `available_countries` contains Belgium and a contact whose country is Belgium,
+Given a provider whose `available_country_ids` contains Belgium and a contact whose country is Belgium,
 When the compatible providers are computed,
 Then the provider is in the result.
 
 **PAY-AC-026. A provider is not available outside its listed countries.**
-Given a provider whose `available_countries` contains Belgium and a contact whose country is France,
+Given a provider whose `available_country_ids` contains Belgium and a contact whose country is France,
 When the compatible providers are computed,
 Then the provider is not in the result and the availability report records the reason `incompatible country`.
 
 **PAY-AC-027. A provider with no listed countries is available everywhere.**
-Given a provider whose `available_countries` is empty and a contact in France,
+Given a provider whose `available_country_ids` is empty and a contact in France,
 When the compatible providers are computed,
 Then the provider is in the result.
 
@@ -177,12 +177,12 @@ When the compatible providers are computed for a validation operation with an am
 Then the provider is in the result.
 
 **PAY-AC-033. Currency restrictions.**
-Given a provider whose `available_currencies` contains only the euro,
+Given a provider whose `available_currency_ids` contains only the euro,
 When the compatible providers are computed for a payment in euro,
 Then the provider is in the result.
 When they are computed for a payment in United States dollars,
 Then the provider is not in the result and the availability report records `incompatible currency`.
-Given instead a provider whose `available_currencies` is empty,
+Given instead a provider whose `available_currency_ids` is empty,
 When the compatible providers are computed for either payment,
 Then the provider is in the result both times.
 
@@ -217,25 +217,25 @@ When the compatible payment methods are computed,
 Then the method is not in the compatible methods and the reason recorded is `no supported provider available`.
 
 **PAY-AC-039. A brand is never selectable.**
-Given an active method whose `primary_payment_method` is the card method,
+Given an active method whose `primary_payment_method_id` is the card method,
 When the compatible payment methods are computed,
 Then the method is not in the compatible methods, whatever the providers.
 
 **PAY-AC-040. Country and currency restrictions of a method.**
-Given a method whose `supported_countries` contains Belgium,
+Given a method whose `supported_country_ids` contains Belgium,
 When the compatible payment methods are computed for a contact in Belgium,
 Then the method is available.
 When they are computed for a contact in France,
 Then the method is removed with the reason `incompatible country`.
-Given instead a method whose `supported_countries` is empty,
+Given instead a method whose `supported_country_ids` is empty,
 When the compatible payment methods are computed for any contact,
 Then the method is available.
-Given a method whose `supported_currencies` contains only the euro,
+Given a method whose `supported_currency_ids` contains only the euro,
 When the compatible payment methods are computed for a payment in euro,
 Then the method is available.
 When they are computed for a payment in United States dollars,
 Then the method is removed with the reason `incompatible currency`.
-Given instead a method whose `supported_currencies` is empty,
+Given instead a method whose `supported_currency_ids` is empty,
 When the compatible payment methods are computed in any currency,
 Then the method is available.
 
@@ -264,7 +264,7 @@ Then the change succeeds, because the check reads the primary method's flag.
 
 **PAY-AC-045. Detaching a method from a provider archives the tokens.**
 Given an active method attached to a provider, with two active tokens that use that method and that provider,
-When an administrator removes the provider from the method's `providers`,
+When an administrator removes the provider from the method's `provider_ids`,
 Then the two tokens become archived.
 
 **PAY-AC-046. The placeholder method may not be deleted.**
@@ -369,7 +369,7 @@ Then the second creation is refused with `Reference must be unique!`
 **PAY-AC-064. The contact is snapshotted.**
 Given a contact whose street is `Huge Street`, whose second street line is `2/543`, whose city is `Sin City`, whose postal code is `1000`, whose country is Belgium and whose email address is `norbert.buyer@example.com`,
 When a transaction is created for that contact,
-Then `partner_address` is `Huge Street 2/543`, `partner_city` is `Sin City`, `partner_zip` is `1000`, `partner_country` is Belgium and `partner_email` is `norbert.buyer@example.com`.
+Then `partner_address` is `Huge Street 2/543`, `partner_city` is `Sin City`, `partner_zip` is `1000`, `partner_country_id` is Belgium and `partner_email` is `norbert.buyer@example.com`.
 And When the contact's street is changed afterwards, Then the transaction's `partner_address` does not change.
 
 **PAY-AC-065. A transaction may not use an archived token.**
@@ -482,12 +482,12 @@ Then a warning log entry about the missing reference is produced and nothing is 
 **PAY-AC-084. A confirmed transaction that asked for a token creates one.**
 Given a transaction whose `tokenize` is true and whose provider allows tokenization,
 When the payment data confirm it,
-Then a Payment Token is created with the transaction's provider, payment method and contact, plus the connector's values; the transaction's `token` points at it; and `tokenize` becomes false.
+Then a Payment Token is created with the transaction's provider, payment method and contact, plus the connector's values; the transaction's `token_id` points at it; and `tokenize` becomes false.
 
 **PAY-AC-085. An authorized transaction that asked for a token creates one.**
 Given a transaction whose `tokenize` is true and whose provider allows tokenization,
 When the payment data authorize it, moving it to the state `authorized`,
-Then a Payment Token is created with the transaction's provider, payment method and contact, plus the connector's values; the transaction's `token` points at it; and `tokenize` becomes false.
+Then a Payment Token is created with the transaction's provider, payment method and contact, plus the connector's values; the transaction's `token_id` points at it; and `tokenize` becomes false.
 
 **PAY-AC-086. A transaction that did not ask for a token creates none.**
 Given a transaction whose `tokenize` is false,
@@ -521,7 +521,7 @@ Then the checkbox that saves the payment method is present in both cases.
 **PAY-AC-091. Capturing an authorized transaction creates a child transaction.**
 Given a transaction of 1111.11 euro in state `authorized` whose provider captures manually and supports only full capture,
 When a billing user captures it,
-Then exactly one child transaction is created with `source_transaction` equal to it, `amount` equal to 1111.11, `operation` equal to the source's operation, and the reference `P-<source reference>`.
+Then exactly one child transaction is created with `source_transaction_id` equal to it, `amount` equal to 1111.11, `operation` equal to the source's operation, and the reference `P-<source reference>`.
 
 **PAY-AC-092. Voiding an authorized transaction creates a child transaction.**
 Given the same transaction,
@@ -726,7 +726,7 @@ Then the failure is logged with the transaction reference, the work is rolled ba
 **PAY-AC-126. A confirmed transaction produces a posted Payment.**
 Given a confirmed transaction of 120.00 euro linked to the posted invoice `INV/2026/00017` of 120.00,
 When it is post-processed,
-Then a Payment is created with `amount` 120.00, `payment_type` `inbound`, `partner_type` `customer`, the commercial contact of the transaction's contact, the provider's journal, the provider's payment method line, `memo` equal to `<reference> - <provider reference>` and `payment_transaction` set; the Payment is posted; and the message `The payment related to transaction <link> has been posted: <link>` is logged.
+Then a Payment is created with `amount` 120.00, `payment_type` `inbound`, `partner_type` `customer`, the commercial contact of the transaction's contact, the provider's journal, the provider's payment method line, `memo` equal to `<reference> - <provider reference>` and `payment_transaction_id` set; the Payment is posted; and the message `The payment related to transaction <link> has been posted: <link>` is logged.
 
 **PAY-AC-127. The Payment settles the invoice.**
 Given the previous scenario, in which the Payment of 120.00 euro was created and posted for the invoice `INV/2026/00017`,
@@ -756,7 +756,7 @@ Then its Payment is reconciled against `INV/2026/00017`.
 **PAY-AC-132. A refund produces an outbound Payment.**
 Given a confirmed refund transaction of −30.00 euro,
 When it is post-processed,
-Then a Payment is created with `amount` 30.00 and `payment_type` `outbound`, whose `source_payment` is the Payment of the source transaction, and nothing is reconciled automatically.
+Then a Payment is created with `amount` 30.00 and `payment_type` `outbound`, whose `source_payment_id` is the Payment of the source transaction, and nothing is reconciled automatically.
 
 **PAY-AC-133. A cancelled transaction cancels its Payment.**
 Given a confirmed transaction with a posted Payment,
@@ -1311,17 +1311,17 @@ Then the transaction becomes `error` with `Unable to verify the payment data`.
 # 21. Payment links
 
 **PAY-AC-234. A link for a document with nothing to pay is refused.**
-Given a link wizard whose `amount_maximum` is 0,
+Given a link wizard whose `amount_max` is 0,
 When the wizard computes its warning message,
 Then the warning message is `There is nothing to be paid.`
 
 **PAY-AC-235. A link with a non-positive amount is refused.**
-Given `amount` equal to 0 and `amount_maximum` equal to 120.00,
+Given `amount` equal to 0 and `amount_max` equal to 120.00,
 When the wizard computes its warning message,
 Then the warning message is `Please set a positive amount.`
 
 **PAY-AC-236. A link above the maximum is refused.**
-Given `amount` equal to 150.00 and `amount_maximum` equal to 120.00 euro,
+Given `amount` equal to 150.00 and `amount_max` equal to 120.00 euro,
 When the wizard computes its warning message,
 Then the warning message is `Please set an amount lower than €120.00.`
 
@@ -1497,7 +1497,7 @@ When an administrator sets `state` to `enabled`,
 Then the write is refused with `You cannot set the provider state to Enabled until your onboarding to Stripe is completed.` and the state is unchanged (PAY-RULE-019).
 
 **PAY-AC-266. An accounting payment method line of a live provider may not be deleted.**
-Given a Payment Method Line whose `payment_provider` is a provider in the state `enabled`,
+Given a Payment Method Line whose `payment_provider_id` is a provider in the state `enabled`,
 When a user deletes that line outside of a package removal,
 Then the deletion is refused with `You can't delete a payment method that is linked to a provider in the enabled or test state.` followed by a new line, `Linked providers(s): ` and the display name of that provider (PAY-RULE-021).
 Given the same line whose provider is in the state `test`,
@@ -1545,10 +1545,10 @@ When the inline form values are built,
 Then the derived country code is the empty text and the locale sent is `en-US`.
 
 **PAY-AC-272. Changing the Paymob account country changes the available currency.**
-Given a Payment Provider whose code is `paymob` and whose `paymob_account_country` is Egypt, so that its `available_currencies` holds exactly the Egyptian pound,
-When an administrator sets `paymob_account_country` to Saudi Arabia,
-Then `available_currencies` holds exactly one currency, the Saudi riyal (`SAR`), and the previous currency is removed rather than added to.
-Given the same provider with `paymob_account_country` set to the United Arab Emirates, When the change is saved, Then `available_currencies` holds exactly the United Arab Emirates dirham; and with Oman, exactly the Omani rial.
+Given a Payment Provider whose code is `paymob` and whose `paymob_account_country_id` is Egypt, so that its `available_currency_ids` holds exactly the Egyptian pound,
+When an administrator sets `paymob_account_country_id` to Saudi Arabia,
+Then `available_currency_ids` holds exactly one currency, the Saudi riyal (`SAR`), and the previous currency is removed rather than added to.
+Given the same provider with `paymob_account_country_id` set to the United Arab Emirates, When the change is saved, Then `available_currency_ids` holds exactly the United Arab Emirates dirham; and with Oman, exactly the Omani rial.
 
 **PAY-AC-273. The Stripe guided setup returns an address to open.**
 Given a Stripe provider whose `state` is `disabled` in a company whose country is one of the forty-four supported countries,
@@ -1591,3 +1591,92 @@ The same holds for the Ugandan shilling with a precision of 2 and the Malagasy a
 Given a Stripe validation transaction created with the amount 0, the operation `validation` and `tokenize` true, whose setup intent the provider has confirmed,
 When the customer's browser reaches the Stripe return endpoint with that transaction's reference,
 Then the setup intent is fetched with its instrument expanded, its description is compared with the transaction reference and matches, the payment data are processed, a Payment Token is created and the request answers successfully rather than failing.
+
+---
+
+# 27. Donations and website-scoped payment
+
+**PAY-AC-281. A donation form post is turned into a page address.**
+Given a public website page carrying a donation block whose recipient address is `info@yourcompany.example.com`, whose prefilled amounts are 10, 25, 50 and 100, whose minimum amount is 5, whose maximum amount is 100, whose slider step is 5 and whose default amount is 25,
+When a visitor who is not signed in picks 50 euro and submits the form to the donation pay endpoint with the post method,
+Then the amount 50.00, the currency identifier of the euro, the donation options and the four descriptions are stored in the visitor's session, and the answer is a redirection to the same path with the "see other" status and no rendered page.
+
+**PAY-AC-282. The donation page fills its defaults from the session.**
+Given the session of PAY-AC-281,
+When the visitor's browser follows the redirection with the get method and no parameter at all,
+Then the page is rendered with the amount 50.00, the currency euro, the four descriptions and the donation options taken from the session; the paying contact is the public contact of the request; and the access token is the signature of that contact, 50.00 and the euro.
+
+**PAY-AC-283. The donation page falls back to twenty-five in the company currency.**
+Given a website whose active company is "Acme" with the accounting currency euro, and an empty session,
+When a visitor opens the donation pay endpoint with the get method and no parameter,
+Then the page is rendered with the amount 25.00, the currency euro and a free custom amount as the only donation option.
+
+**PAY-AC-284. The donation form hides the save-my-details box for an anonymous donor.**
+Given a donation page rendered for a visitor who is not signed in, and a provider that allows tokenization,
+When the payment form is built,
+Then the "save my payment details" box is hidden for that provider, and the submit button reads `Donate`.
+
+**PAY-AC-285. A donation below the minimum is refused.**
+Given a donation block whose minimum amount is 5,
+When the donation transaction endpoint is called for the path part 5 with the amount 4.99,
+Then the call is refused with `Donation amount must be at least 5.00.` and no transaction is created.
+
+**PAY-AC-286. Missing donor details are refused in order.**
+Given a visitor who is not signed in,
+When the donation transaction endpoint is called with an amount of 50.00 and donor details that carry no name, no electronic mail address and no country,
+Then the call is refused with `Name is required.`; when only the name is supplied, it is refused with `Email is required.`; when the name and the address are supplied, it is refused with `Country is required.`; and in each case no transaction is created.
+
+**PAY-AC-287. An anonymous donation is recorded on the public contact and never tokenized.**
+Given a visitor who is not signed in, a donation of 50.00 euro and donor details naming "Ada Giver", the address `ada@example.com` and the country Belgium,
+When the donation transaction endpoint is called with a valid access token,
+Then a transaction is created with the amount 50.00, the currency euro, the paying contact equal to the website's public contact, the tokenize flag false, the donation flag true, the contact snapshot name "Ada Giver", the snapshot address `ada@example.com`, the snapshot country Belgium and the snapshot language equal to the language of the request.
+
+**PAY-AC-288. A signed-in donor keeps his own contact and gains a country.**
+Given a signed-in customer "Norbert Buyer" whose contact carries no country, and donor details naming Belgium,
+When the donation transaction endpoint is called,
+Then the transaction is created for that customer's own contact and the snapshot country becomes Belgium, while the snapshot name and address stay those of the contact.
+
+**PAY-AC-289. The access token of a donation follows the amount actually chosen.**
+Given a donation page opened with the amount 25.00 and its matching access token,
+When the visitor changes the amount to 60.00 and confirms, and the transaction is created for 60.00,
+Then the landing address of the transaction carries a token computed over the contact, 60.00 and the currency, and the token computed over 25.00 no longer opens the confirmation page.
+
+**PAY-AC-290. The internal notification is sent as soon as the donation is created.**
+Given the donation of PAY-AC-287 and the recipient address `info@yourcompany.example.com`,
+When the donation transaction endpoint returns,
+Then exactly one message has been sent to that address with the subject `A donation has been made on your website`, whose body carries the donor name "Ada Giver", the address `ada@example.com`, the donation date, the amount 50.00 with the currency symbol, the donor comment when one was given, the provider code and the transaction reference; and the transaction is still in the state `draft`.
+
+**PAY-AC-291. The donor receives a confirmation only on success.**
+Given the donation transaction of PAY-AC-287,
+When it reaches the state `done` and is post-processed,
+Then exactly one message with the subject `Donation confirmation` is sent to `ada@example.com`, rendered in the language recorded on the transaction, opening with `Dear Ada Giver,` and stating the amount 50.00 and the creation date; and when the transaction instead reaches `cancel` or `error`, no such message is sent.
+
+**PAY-AC-292. The Payment of a donation carries the donation details.**
+Given the confirmed donation transaction of PAY-AC-291,
+When post-processing creates its Payment,
+Then the Payment carries the donation flag true, and a log entry is written on it reading `Payment received from donation with following details:` followed by one line for the company, one for the contact, one for the contact name, one for the contact country and one for the contact electronic mail address, each prefixed by the label of that field, and no line at all for a value that is empty.
+
+**PAY-AC-293. A provider bound to one website is not offered on another.**
+Given two websites, "Site A" and "Site B", both of company "Acme", and a provider whose website is "Site A",
+When a payment form is served for "Site B",
+Then that provider is absent from the compatible providers, and the availability report records it as unavailable with the reason `incompatible website`; and when the same form is served for "Site A", or when the provider's website is emptied, the provider is present.
+
+**PAY-AC-294. Duplicating a provider keeps the website only inside the company tree.**
+Given a provider of company "Acme" bound to the website "Site A",
+When the provider is duplicated without a website in the duplication values, and the copy stays in company "Acme",
+Then the copy is bound to "Site A"; and when the copy is created in a company that is not "Acme" nor one of its descendants, the copy is bound to no website at all.
+
+**PAY-AC-295. The supported payment methods block lists brands, not their primary method.**
+Given a website of company "Acme" with one published provider that supports the primary method "Card", which is active and carries the brands "Visa" and "Mastercard", and the primary method "PayPal", which is active and has no brand,
+When the supported payment methods endpoint is called with no limit,
+Then the answer contains exactly three entries, "Visa", "Mastercard" and "PayPal", each with its name and the address of its image, and does not contain "Card".
+
+**PAY-AC-296. The supported payment methods block honours its limit and its caching.**
+Given the setting of PAY-AC-295,
+When the endpoint is called with the limit 2 by a visitor who is not an internal user,
+Then at most two entries are returned and the answer declares that it may be cached publicly for seven days with one further day of stale reuse; and when the same call is made by an internal user, the answer declares that it must not be cached.
+
+**PAY-AC-297. A website request builds its addresses from the site it is serving.**
+Given a database serving "Site A" at one address and "Site B" at another, and a provider used by both,
+When a transaction is created while serving "Site B",
+Then the return address and the webhook address given to the provider are built from the root address of the request to "Site B", not from the database-wide base address; and an address written in a non-Latin script is given to the provider in its plain-letter transcription.

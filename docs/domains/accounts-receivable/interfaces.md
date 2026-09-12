@@ -77,6 +77,7 @@ Empty-state help texts shown when a list has no record:
 | **Preview** | any | Opens the customer's portal view of the document in the browser. |
 | **Credit Note** | an invoice | Opens the reversal wizard with the title "Credit Note". |
 | **Reverse Entry** | a plain entry | Opens the reversal wizard. |
+| **Debit Note** | the status is posted **and** the document type is one of customer invoice, customer credit note, vendor bill or vendor credit note; only for the invoicing group | Opens the create-debit-note dialogue, titled "Create Debit Note". It sits immediately after the reversal button in the header and carries the keyboard shortcut shift and the letter d. |
 | **Cancel** | draft or posted, invoicing group | Cancels. On a plain entry the label is **Cancel Entry**. |
 | **Reset to Draft** | posted or cancelled, invoicing group, and the reset-to-draft indicator is on | Resets. |
 | **Lock** | invoicing group, when hashing is available | Hashes the document chain immediately. |
@@ -213,7 +214,13 @@ Salesperson, Period, Next Payment Date, Invoice Line, Activities of, Activity ty
 | To pay | not cancelled, payment status is not paid or partially paid, and the type is not a plain entry |
 | In payment | posted and payment status is in payment |
 | Overdue | the due date has passed and the document is still owed |
+| Debit Notes | the document names an original invoice debited, that is, it was produced by the create-debit-note dialogue. It is placed immediately after the credit-note filter and is followed by a separator. |
 | Invoice Date, Accounting Date, Due Date | date range filters |
+
+The same condition is offered under the label **Debit Note** (singular) on two further search panels:
+the journal-entry search panel, where it is placed after the "Reversed" filter and tests the document's
+own original-invoice-debited link; and the journal-item search panel, where it tests the same link on
+the item's document.
 
 **Groupings**: Salesperson, Partner, Status, Payment Method, Journal, Company, Invoice Date, Due
 Date, Accounting Date, Sequence Prefix (hidden, used by the numbering report).
@@ -267,6 +274,7 @@ described in words.
 | Update fiscal position values | a set of documents | nothing | Re-applies the fiscal position to the lines. |
 | Activate the currency | one document | nothing | Un-archives the document's currency. |
 | Delete duplicates | a set of documents | nothing | Deletes every detected duplicate. |
+| Share | one document | a dialogue descriptor for the portal sharing dialogue | Offers the document's portal address to chosen recipients. It is also published as a shipped server action named exactly "Share", bound to the journal entry entity and offered on the **form** view (see [`configuration.md`](configuration.md) section 5.1); choosing it from the action menu of an open document calls this operation. |
 
 ---
 
@@ -329,13 +337,29 @@ whether the *pro forma* mode is on:
 In *pro forma* mode each of these is prefixed with "Proforma" (for example "Proforma Invoice",
 "Draft Proforma Credit Note"). The number is appended when it exists and is not `/`.
 
+**Debit notes override six rows of the table above.** When the document is a **customer invoice**
+that names an original invoice debited — that is, one produced by the create-debit-note dialogue —
+the six customer-invoice titles are replaced:
+
+| Status and mode | Ordinary title | Title when the document is a debit note |
+| --- | --- | --- |
+| posted | Invoice | Debit Note |
+| draft | Draft Invoice | Draft Debit Note |
+| cancelled | Cancelled Invoice | Cancelled Debit Note |
+| posted, *pro forma* | Proforma Invoice | Proforma Debit Note |
+| draft, *pro forma* | Draft Proforma Invoice | Draft Proforma Debit Note |
+| cancelled, *pro forma* | Cancelled Proforma Invoice | Cancelled Proforma Debit Note |
+
+No other row is overridden: a vendor bill that is a debit note still prints under the vendor-bill
+titles, because only the customer-invoice branches are replaced.
+
 ### 6.3 The information strip
 
 Shown when at least one of its cells has content. Cells, in order:
 
 | Cell | Label | Shown when |
 | --- | --- | --- |
-| Document date | "Invoice Date" for a customer invoice, "Credit Note Date" for a customer credit note, "Receipt Date" for a sales receipt, "Date" otherwise | the document date is set |
+| Document date | "Debit Note Date" for a customer invoice that names an original invoice debited; otherwise "Invoice Date" for a customer invoice, "Credit Note Date" for a customer credit note, "Receipt Date" for a sales receipt, "Date" in every other case | the document date is set |
 | Due date | Due Date | the due date is set, the type is customer invoice and the status is posted |
 | Taxable supply date | Taxable Supply | a localization enables it |
 | Delivery date | Delivery Date | it is set |
@@ -424,6 +448,11 @@ do not duplicate on the document.
 
 | Event | Body |
 | --- | --- |
+| the document is created and its type is a customer invoice | Invoice Created |
+| the document is created and its type is a customer credit note | Credit Note Created |
+| the document is created and its type is a sales receipt | Sales Receipt Created |
+| the document is created and its type is a vendor bill, a vendor credit note or a purchase receipt | Vendor Bill Created, Refund Created and Purchase Receipt Created respectively; see [`../accounts-payable/interfaces.md`](../accounts-payable/interfaces.md) |
+| the document is created and its type is a plain journal entry | the platform's generic creation message, unchanged; the six texts above apply to invoice-like documents only |
 | soft posting of a future-dated document | This move will be posted at the accounting date: *the date* |
 | reversal | This entry has been **reversed** *(a link to the reverse)* |
 | debit note creation | This debit note was created from: *(a link to the source)* |
@@ -431,11 +460,63 @@ do not duplicate on the document.
 | a line was deleted on such a document | Journal Item *(a link)* deleted, with the tracked values |
 | the auto-post job failed on this document | The move could not be posted for the following reason: *the error* |
 | a send failed | the formatted error: its title, then a bulleted list of the individual errors |
+| a payment transaction linked to this document reaches the done state and has produced a payment | The payment related to transaction *a link to the transaction* has been posted: *a link to the payment*. The same message is written on **every** document the transaction is linked to, so a transaction that settles three invoices writes it three times, once per invoice. |
+
+The creation message is the first message every document receives. On a **customer invoice** and on a
+**sales receipt** it is filed under the hidden Invoice Created subtype of section 7.4; on every other
+document type — customer credit note included — the platform's generic creation subtype applies. Being
+hidden, the Invoice Created subtype notifies nobody.
 
 Tracked fields on the document itself (each change writes a tracking row): number, reference,
 accounting date, status, document type, partner, recipient bank account, salesperson, currency,
 untaxed amount, total, payment status, reviewed, origin, source e-mail address. Tracked fields on a
 line: account, label, due date.
+
+### 7.4 Subscription subtypes and which one a tracked change carries
+
+Three subscription subtypes are shipped for the document thread. A follower subscribes to a subtype
+to be notified of the events that carry it. None of the three is a default subscription: a new
+follower receives none of them unless it is added explicitly.
+
+| Label | Description shown next to the label | Hidden from the subscription list | Meaning |
+| --- | --- | --- | --- |
+| Validated | Invoice validated | no | The document has been posted. |
+| Paid | Invoice paid | no | The document has been settled in full. |
+| Invoice Created | Invoice Created | **yes** | The document has just been created. It is used as the creation subtype for a customer invoice and a sales receipt only; every other type keeps the generic creation subtype. Being hidden, it cannot be subscribed to from the interface; it exists so that the creation message of those two types is filed under a subtype of its own. |
+
+Which subtype a tracked change carries, evaluated in this order:
+
+1. On a document that is not an invoice (receipts included), the platform's generic rule applies, and
+   additionally, when the status changed, the tracking of the originating payment's own status is
+   replayed on that payment.
+2. On an invoice-like document whose payment status changed to `paid`, the message carries the
+   **Paid** subtype.
+3. Otherwise, on an invoice-like document whose status changed to `posted` **and** which is a sale
+   document (receipts included), the message carries the **Validated** subtype.
+4. In every other case the platform's generic subtype applies.
+
+So a posted vendor bill never raises the Validated subtype, while a posted sales receipt does; and a
+document that is posted and paid in the same operation raises Paid, not Validated, because the
+payment-status test is evaluated first.
+
+### 7.5 Subtitles of a notification electronic mail
+
+When a message on the document is rendered as a notification electronic mail, the header carries
+subtitles. The first is always the document's display name, then " - " and the partner's name when
+the partner has one, and the display name alone when it has not.
+
+For an invoice-like document (receipts included) a second subtitle is added:
+
+| Condition | Second subtitle |
+| --- | --- |
+| the due date is set **and** the payment status is neither `in_payment` nor `paid` | the document total formatted in the document currency, then an ordinary space, then the word "due", then a **no-break** space, then the formatted due date. The no-break space is deliberate: it keeps the word and the date on one line. |
+| any other case (no due date, or the payment status is `in_payment` or `paid`) | the document total formatted in the document currency, alone |
+
+The amount used is the document total; when the document has no stored total yet, the total carried
+by the totals structure is used instead. Both are formatted in the recipient's language.
+
+A plain journal entry gets the first subtitle only: the amount is deliberately withheld, because a
+miscellaneous entry's total would mislead the reader.
 
 ---
 
@@ -477,20 +558,27 @@ Without a bank account, no code is produced. A currency must always be supplied,
 
 ### 9.2 The Single Euro Payments Area credit transfer generator (stored value `sct_qr`, priority 20)
 
-**Eligibility.** Refused, with one message per failing condition joined by a line break, when:
+**Eligibility.** Refused, with one message per failing condition joined by a carriage return and a
+line feed, when:
 
 - the currency is not the euro:
-  > Can't generate a Single Euro Payments Area quick response Code with the *currency name* currency.
-- the account is not an international bank account number:
-  > Can't generate a Single Euro Payments Area quick response code if the account type isn't international bank account number.
-- the sanitised account number's first two characters are not the country code of a Single Euro
-  Payments Area country that uses international bank account numbers (the area's country list minus
-  the territories that share another country's account prefix):
-  > Can't generate a Single Euro Payments Area quick response code with a non Single Euro Payments Area iban.
+  > "Can't generate a SEPA QR Code with the <the currency name> currency."
+- the account is not of the international kind:
+  > "Can't generate a SEPA QR code if the account type isn't IBAN."
+- the sanitised account number is empty, or its first two characters are not the country code of a
+  Single Euro Payments Area country that uses international account numbers (the area's country list
+  minus the territories that share another country's account prefix):
+  > "Can't generate a SEPA QR code with a non SEPA iban."
+
+The three texts above are reproduced exactly as the system emits them, because support procedures and
+tests key on them. In them, the four letters that abbreviate the payment area stand for the Single
+Euro Payments Area, the two letters that abbreviate the code stand for a quick response code, and the
+four letters that abbreviate the account number stand for an international bank account number. The
+placeholder in the first message is the code of the document currency.
 
 **Data check.** The account must have either an account holder name or a partner name:
 
-> The account receiving the payment must have an account holder name or partner name set.
+> "The account receiving the payment must have an account holder name or partner name set." 
 
 **Payload.** Twelve lines, in this exact order, separated by line breaks:
 
@@ -520,17 +608,41 @@ the framing; each country variant supplies the merchant account information, the
 field and the merchant category code.
 
 **Eligibility.** Without a bank account:
-> A bank account is required for EMV quick response Code generation.
+> "A bank account is required for EMV QR Code generation."
 
 With a bank account but no country variant that matches its country:
-> No EMV quick response Code is available for the country of the account *the account number*.
+> "No EMV QR Code is available for the country of the account <the account number>."
+
+Both texts are reproduced exactly as the system emits them. In them, the three letters that
+abbreviate the standard name the international card specification behind the merchant-presented code,
+and the two letters that abbreviate the code stand for a quick response code. The placeholder in the
+second message is the account number as it was typed, not the sanitised form.
 
 **Data check.** In order, the first failure is reported:
 
-> Missing Merchant Account Information.
-> Missing Merchant City.
-> Missing Proxy Type.
-> Missing Proxy Value.
+| Order | Condition | Message |
+| --- | --- | --- |
+| 1 | the merchant account information is empty | "Missing Merchant Account Information." |
+| 2 | the account's partner has no city | "Missing Merchant City." |
+| 3 | the proxy type is empty | "Missing Proxy Type." |
+| 4 | the proxy value is empty | "Missing Proxy Value." |
+
+**Compatibility finding.** Two of these four checks cannot fire in the base platform.
+
+- The first one reads the merchant account information, which the base platform returns as a pair of
+  two empty values rather than as nothing at all. A pair of two values is not empty, so the test
+  never succeeds and the message "Missing Merchant Account Information." is unreachable until a
+  country variant replaces the lookup with one that can return nothing.
+- The third one reads the proxy type, whose only shipped value is `none` (labelled None) and whose
+  default is that same value. A stored value of `none` is a non-empty text, so the test never
+  succeeds and the message "Missing Proxy Type." is likewise unreachable until a country variant adds
+  further proxy types **and** the field can be genuinely cleared.
+
+  A corrected behaviour would test the merchant account information for a pair whose second element
+  is empty rather than for an empty result, and would treat the proxy type value `none` as "no proxy
+  chosen" so that the third check fires. Until then, a code generated on an unconfigured account
+  fails on the second or the fourth check, or produces a payload with an empty merchant account
+  element.
 
 **Encoding.** Every element is written as a two-digit identifier, a two-digit length and the value;
 an element whose value is empty or absent is omitted entirely.
@@ -587,6 +699,15 @@ leu 946, Turkish lira 949, West African franc 952, French Pacific franc 953, Bul
 
 A currency not in this table cannot be encoded by this generator.
 
+**Compatibility finding.** There is no message for that case, and no check that would produce one.
+Neither the eligibility check nor the data check of this generator looks at the currency: the numeric
+code is read straight out of the shipped table while the payload is being built. A document in a
+currency outside the table therefore fails with an internal lookup failure rather than with one of
+the refusal messages above, and the user sees a generic system error instead of an explanation. A
+corrected behaviour would add the currency to the eligibility check and refuse with a message of the
+same family, naming the currency that cannot be encoded, so that the code is silently skipped on the
+printed document exactly as the other eligibility failures are.
+
 ### 9.4 Bank account fields that feed the codes
 
 | Field | Effect |
@@ -598,8 +719,10 @@ A currency not in this table cannot be encoded by this generator.
 ### 9.5 The portal-link code
 
 Independent of the payment code. It encodes the document's portal payment address, produced by the
-payment-link wizard for that document, rendered as a one-hundred-and-twenty-eight-pixel square image
-with the quiet zone enabled, and wrapped in a hyperlink to the same address.
+payment-link wizard for that document (its exact composition is in
+[`entities.md`](entities.md) section 14.4), rendered as a square image of one hundred and
+twenty-eight by one hundred and twenty-eight **with no quiet zone** — the same suppression as the
+payment code of section 9.1 — and wrapped in a hyperlink to the same address.
 
 ---
 
@@ -611,6 +734,23 @@ with the quiet zone enabled, and wrapped in a hyperlink to the same address.
 - **Import.** Documents and lines can be imported through the generic import mechanism. An imported
   line is flagged as such, which suppresses the automatic defaulting of its unit price, its taxes and
   the archived-account check.
+- **Downloadable import templates.** The import screen offers a prepared spreadsheet to start from.
+  Exactly one is offered, or none, and which one depends on the document type the screen was opened
+  for — that is, on the type the list being imported into defaults to:
+
+  | Document type the screen defaults to | Offered template | Address it is downloaded from |
+  | --- | --- | --- |
+  | plain journal entry | Import Template for Misc. Operations | `/account/static/xls/misc_operations_import_template.xlsx` |
+  | customer invoice | Import Template for Invoices | `/account/static/xls/customer_invoices_credit_notes_import_template.xlsx` |
+  | customer credit note | Import Template for Credit Notes | `/account/static/xls/customer_invoices_credit_notes_import_template.xlsx` |
+  | vendor bill | Import Template for Bills | `/account/static/xls/vendor_bills_refunds_import_template.xlsx` |
+  | vendor credit note | Import Template for Refunds | `/account/static/xls/vendor_bills_refunds_import_template.xlsx` |
+  | sales receipt, purchase receipt, or no default type at all | none — the import screen offers no template |
+
+  Two of the addresses are shared by two types: the customer invoice and the customer credit note
+  download the same spreadsheet under two different labels, and so do the vendor bill and the vendor
+  credit note. The names above are reproduced exactly as the download button shows them, including
+  the shortened word in the first one.
 - **Structured electronic documents.** Producing and consuming them belongs to
   [`../electronic-invoicing-and-document-exchange/interfaces.md`](../electronic-invoicing-and-document-exchange/interfaces.md);
   this domain contributes the source data and the extra channels shown in the send wizard.
@@ -658,3 +798,50 @@ same shape because the client and the printed document depend on them.
 | Payment term details (`payment_term_details`) | a list, sorted by maturity date, of entries each with the formatted date and the customer-facing amount | the printed instalment table |
 | Alerts (`alerts`) | a map from a stable key to an entry with a level, a message and, optionally, an action label plus either an action descriptor or a direct operation to call | the banner area |
 | Next payment values | the payment status, the instalment state, the next amount to pay, the next reference, the amount paid, the amount due, the next due date, the document due date, the list of unreconciled instalments, whether only one remains, and, in the early-discount case, the discount amount in both currencies, the deadline, the days left, the discount line and the message | the portal page and the payment link wizard |
+
+---
+
+## 14. The sending dialogues
+
+### 14.1 The single-document dialogue
+
+It renders the fields of [`entities.md`](entities.md) section 8.1: the channel checkboxes, the extra
+electronic delivery checkboxes, the electronic format, the layout selector (only when more than one
+layout is available and the document has no file yet), the mail template selector, the recipients,
+the subject, the body and the attachment list (only when the attachments widget is enabled). Above
+them the alert block shows the collected warnings; a blocking alert is raised instead of sending.
+
+Its buttons are **Send** — which runs the flow of [`workflows.md`](workflows.md) section 3.1 — and
+**Save as a new template**, described next.
+
+### 14.2 Saving the composed body as a new mail template
+
+| Step | What happens |
+| --- | --- |
+| 1 | The user presses the save-as-template button. A second dialogue opens **on the same wizard record**, rendered with the messaging capability's save-as-template form, at the **medium** dialogue size. Its title is reproduced exactly: "Create a Mail Template". |
+| 2 | That form prompts for one thing: the template name (`template_name`). The subject field is cleared beforehand so that the user can type a name of their own rather than accept the rendered subject. |
+| 3 | Confirming creates a mail template. It is refused when the wizard's related document model is empty or names an entity that does not exist, with: "Template creation from composer requires a valid model." |
+| 4 | Otherwise the created template carries: **name** = the typed template name, or, when the user typed none, the current subject; **subject** = the current subject; **body** = the current body; **entity** = the journal entry; the "use the default recipients" flag switched on; and the current user as its owner. |
+| 5 | The new template is then written back onto the sending wizard as its selected template, so the user returns to a dialogue that is already using it. |
+| 6 | The sending dialogue is reopened on the same wizard record at the **large** dialogue size. |
+| 7 | Cancelling instead of confirming also reopens the sending dialogue on the same record at the large dialogue size, which restores the subject that step 2 had cleared. Nothing is created. |
+
+### 14.3 The batch dialogue
+
+It renders the summary of [`entities.md`](entities.md) section 8.2 — one line per channel and per
+extra electronic delivery, each with its count and its label, the manual channel appearing under the
+label "Manually" and each extra delivery under a label beginning with "by " — plus the alert block.
+There is nothing to choose. Its confirming button runs the flow of
+[`workflows.md`](workflows.md) section 3.2.
+
+---
+
+## 15. The contact form in its receivable role
+
+| Element | Behaviour |
+| --- | --- |
+| **Customer Invoices** operation | Opens the customer-document window action restricted to the documents whose type is `out_invoice` (Customer Invoice) or `out_refund` (Customer Credit Note) and whose partner is this contact **or any of its descendants**, archived descendants included. The opened list defaults a new document to the customer-invoice type, presents itself as the customer-invoice screen, restricts the journal choice to the sale kind, and arrives with the "unpaid" filter of section 3.2 already selected. |
+| Statistics entry on the contact card | Shown to a member of the invoicing group, for every contact whose accounting count is non-zero. Label reproduced exactly: "Invoices/Bills/Mandates". It carries a pencil-square icon and the ninth colour tag, and its value is the customer-document count plus the vendor-bill count. The arithmetic and the suppression rule are in [`entities.md`](entities.md) section 6.1. |
+| Invoice sending method and electronic invoice format | Selectors on the accounting part of the form. The electronic format selector is hidden while no capability contributes a format, and the layout selector is hidden while only one printable layout applies to invoices; both conditions are the two display flags of [`entities.md`](entities.md) section 6.1. |
+| Credit limit block | The limit, the partner-limit toggle and the receivable aggregates, all restricted to the invoicing and read-only accounting groups. |
+| Deletion | Refused once any journal entry names the contact; the message is in [`business-rules.md`](business-rules.md) section 6.2. |

@@ -46,14 +46,14 @@ The Payment Providers domain lets a customer pay a document (a customer invoice,
 
 ## Entities owned by this domain
 
-| Canonical name | Identifier | Kind | Purpose |
-|---|---|---|---|
-| Payment Provider | `payment_provider` | model | One account with one payment provider, for one company: credentials, state, availability, supported payment methods, feature support and customer-facing messages. |
-| Payment Method | `payment_method` | model | One payment instrument (card, bank transfer, wallet, deferred payment) or one brand of a primary instrument, with its own support flags and its own country and currency restrictions. |
-| Payment Token | `payment_token` | model | A reusable reference, held by the provider, to a customer's payment credentials, together with the clear part of those credentials for display. |
-| Payment Transaction | `payment_transaction` | model | One attempt to move money for one document: amount, currency, contact snapshot, provider, method, token, operation kind and state. |
-| Payment Capture Wizard | `payment_capture_wizard` | transient | Working copy used to capture all or part of one or several authorized amounts and optionally void the rest. |
-| Payment Link Wizard | `payment_link_wizard` | transient | Working copy used to build a signed payment web address for a document. |
+| Full name | Transport name | Storage name | Kind | Purpose |
+|---|---|---|---|---|
+| Payment Provider | `payment.provider` | `payment_provider` | persistent | One account with one payment provider, for one company: credentials, state, availability, supported payment methods, feature support and customer-facing messages. |
+| Payment Method | `payment.method` | `payment_method` | persistent | One payment instrument (card, bank transfer, wallet, deferred payment) or one brand of a primary instrument, with its own support flags and its own country and currency restrictions. |
+| Payment Token | `payment.token` | `payment_token` | persistent | A reusable reference, held by the provider, to a customer's payment credentials, together with the clear part of those credentials for display. |
+| Payment Transaction | `payment.transaction` | `payment_transaction` | persistent | One attempt to move money for one document: amount, currency, contact snapshot, provider, method, token, operation kind and state. |
+| Payment Capture Wizard | `payment.capture.wizard` | `payment_capture_wizard` | transient | Working copy used to capture all or part of one or several authorized amounts and optionally void the rest. |
+| Payment Link Wizard | `payment.link.wizard` | `payment_link_wizard` | transient | Working copy used to build a signed payment web address for a document. |
 
 Six entities, and no more, are defined by this domain. One further transient entity, the Payment Refund Wizard, is defined by the accounting payments capability package and is therefore owned by [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md); because every rule it enforces is a rule of the refund contract of a Payment Transaction, its fields and its validation are specified in [entities.md](entities.md) section 7 of this folder. The owning domain specifies what the resulting refund Payment does in the ledger, and must not restate the wizard's fields.
 
@@ -62,18 +62,18 @@ Six entities, and no more, are defined by this domain. One further transient ent
 | Entity | Owner domain | What this domain adds |
 |---|---|---|
 | Request Routing | [../platform-foundation/](../platform-foundation/README.md) | The operation that lists the capability packages whose front-end translations are loaded on public pages. This domain appends its own package to that list, in order that every message of the payment form, the payment status page and the payment method management page reaches a public visitor in their own language. |
-| Contact | [../contacts-and-organizations/](../contacts-and-organizations/README.md) | `payment_tokens` (the tokens of the contact) and `payment_token_count`. |
+| Contact | [../contacts-and-organizations/](../contacts-and-organizations/README.md) | `payment_token_ids` (the tokens of the contact) and `payment_token_count`. |
 | Country | [../contacts-and-organizations/](../contacts-and-organizations/README.md) | `is_stripe_supported_country` and `is_mercado_pago_supported_country`, two derived flags used by the guided setup. |
 | Company | [../contacts-and-organizations/](../contacts-and-organizations/README.md) | On creation of a company, every installed provider of the current company is duplicated into the new company. |
-| Configuration Settings | [../platform-foundation/](../platform-foundation/README.md) | `active_provider`, `has_enabled_provider`, `onboarding_payment_module` and the guided setup operation. |
+| Configuration Settings | [../platform-foundation/](../platform-foundation/README.md) | `active_provider_id`, `has_enabled_provider`, `onboarding_payment_module` and the guided setup operation. |
 | Journal | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | A journal that is used by a provider which is not disabled may not be deleted. |
-| Payment Method Line | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | `payment_provider` and `payment_provider_state`; a line linked to a provider in the enabled or test state may not be deleted. |
-| Payment | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | `payment_transaction`, `payment_token`, `amount_available_for_refund`, `suitable_payment_tokens`, `use_electronic_payment_method`, `source_payment`, `refunds_count`, and the ability to post a payment by charging a token. |
-| Payment Registration Wizard | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | `payment_token`, `suitable_payment_tokens`, `use_electronic_payment_method`. |
+| Payment Method Line | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | `payment_provider_id` and `payment_provider_state`; a line linked to a provider in the enabled or test state may not be deleted. |
+| Payment | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | `payment_transaction_id`, `payment_token_id`, `amount_available_for_refund`, `suitable_payment_token_ids`, `use_electronic_payment_method`, `source_payment_id`, `refunds_count`, and the ability to post a payment by charging a token. |
+| Payment Registration Wizard | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | `payment_token_id`, `suitable_payment_token_ids`, `use_electronic_payment_method`. |
 | Payment Refund Wizard | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | The whole wizard is driven by this domain's refund contract: `support_refund`, `has_pending_refund`, the refundable amount and the operation that creates the refund transaction. The owning domain specifies the Payment side of the resulting refund; the transaction side is specified in `entities.md` section 7 of this folder, and the two specifications must not be duplicated. |
-| Journal Entry (customer invoice) | [../accounts-receivable/](../accounts-receivable/README.md) | `transactions`, `authorized_transactions`, `transaction_count`, `amount_paid`, the online-payment eligibility test, and the capture and void operations reachable from an invoice. |
-| Sales Order | [../sales/](../sales/README.md) | `transactions` (through the transaction's `sale_orders`), the confirmation of a quotation when a transaction reaches the confirmed state, and automatic invoicing. |
-| Point of Sale Order | [../point-of-sale/](../point-of-sale/README.md) | `point_of_sale_order` on the transaction and the registration of an online point of sale payment. |
+| Journal Entry (customer invoice) | [../accounts-receivable/](../accounts-receivable/README.md) | `transaction_ids`, `authorized_transaction_ids`, `transaction_count`, `amount_paid`, the online-payment eligibility test, and the capture and void operations reachable from an invoice. |
+| Sales Order | [../sales/](../sales/README.md) | `transaction_ids` (through the transaction's `sale_order_ids`), the confirmation of a quotation when a transaction reaches the confirmed state, and automatic invoicing. |
+| Point of Sale Order | [../point-of-sale/](../point-of-sale/README.md) | `pos_order_id` on the transaction and the registration of an online point of sale payment. |
 | Bank Transaction | [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md) | A bank transaction may not be partially reconciled against a Payment that came from a Payment Transaction. |
 
 ## Cross-domain dependencies

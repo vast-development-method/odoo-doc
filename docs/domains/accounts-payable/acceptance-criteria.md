@@ -829,8 +829,9 @@ Every scenario is written in Given / When / Then form with concrete numbers. Unl
 **Given** a posted bill `BILL/2026/01/0003`,
 **When** a debit note is created with date 20 February 2026, reason *Freight omitted*, no journal override and *Copy Lines* off,
 **Then** a draft document of type `in_invoice` is created with vendor reference *BILL/2026/01/0003, Freight omitted*, bill and accounting dates 20 February 2026, the same journal, **no** payment term, **no** lines, and a debit origin pointing at the bill;
-**and** the bill's chatter records *This debit note was created from: «link»*;
-**and** the bill shows a *Debit Notes* counter of 1.
+**and** the **debit note's** chatter records *This debit note was created from: «link»*, the link naming `BILL/2026/01/0003`;
+**and** the bill's own chatter records nothing about the debit note;
+**and** the bill shows a *Debit Notes* counter of 1, the smart button having been hidden while the count was zero.
 
 ### N2. Numbering with a dedicated debit note sequence
 
@@ -838,11 +839,28 @@ Every scenario is written in Given / When / Then form with concrete numbers. Unl
 **When** the debit note of N1 is posted in February 2026,
 **Then** its number begins with `DBILL/2026/02/` and it is numbered independently of ordinary bills.
 
-### N3. A debit note from a vendor credit note
+### N3. A debit note from a vendor credit note, raised through the dialogue
 
-**Given** a posted vendor credit note,
-**When** a debit note is raised from it with *Copy Lines* on,
-**Then** the produced document's type is `in_invoice` and its lines are **not** copied, because copying is never honoured from a credit note.
+**Given** a posted vendor credit note of one line, 200.00 on account 600000,
+**When** a debit note is raised from it through the *Create Debit Note* dialogue,
+**Then** the *Copy Lines* switch is **not shown**, because the source's type is `in_refund`;
+**and** the switch therefore keeps its default of off;
+**and** the produced document's type is `in_invoice`, it carries **no** line, and its debit origin is the credit note.
+
+### N3b. A debit note from a vendor credit note, with *Copy Lines* set programmatically
+
+**Given** the same posted vendor credit note of one line, 200.00 on account 600000,
+**When** the wizard is driven without the form and *Copy Lines* is set to true,
+**Then** the produced document's type is `in_invoice` and it **does** carry a copy of the credit note's line, 200.00 on account 600000 — the guard meant to refuse this never matches (**compatibility finding**, `business-rules.md` §11);
+**and** a rebuild implementing the corrected behaviour produces a document with **no** line instead, which is the only difference between the two behaviours.
+
+### N5. The printed debit note
+
+**Given** the debit note of N1, posted,
+**When** its printable document is produced,
+**Then** the title reads *Debit Note* rather than *Invoice*, and would read *Draft Debit Note*, *Cancelled Debit Note*, *Proforma Debit Note*, *Draft Proforma Debit Note* or *Cancelled Proforma Debit Note* in the corresponding states;
+**and** no link to `BILL/2026/01/0003` appears anywhere on the printed page — the debit origin is shown only on the form;
+**and** the date caption is the ordinary purchase-document caption, **not** *Debit Note Date*, because the substituted caption serves the `out_invoice` branch only (**compatibility finding**, `interfaces.md` §8.1).
 
 ### N4. A second debit note is refused
 
@@ -985,3 +1003,119 @@ Every scenario is written in Given / When / Then form with concrete numbers. Unl
 
 **Given** a user whose allowed companies are A and B,
 **Then** the document list, the journal item list and the analysis report all hide documents of company C.
+
+
+---
+
+## Group T — Discounts, auto-complete and the decoding contract
+
+### T1. Discount-allocation lines on a bill
+
+**Given** the company's *Vendor Bills Discounts Account* set to **710000 Purchase Discounts**, and a draft bill of one line: 10 units of a service at 50.00 each, 10 % line discount, expense account 600000, no tax, document currency Euro,
+**When** the bill is saved and posted,
+**Then** the entry holds four items: `product` 600000 debit 450.00; `discount` 600000 debit 50.00; `discount` 710000 credit 50.00; `payment_term` 400000 credit 450.00;
+**and** both `discount` items are labelled *Discount*, carry no tax, carry no maturity date and are not reconcilable;
+**and** the document total is 450.00, so the supplier is owed the net amount.
+
+### T2. Discount allocation is skipped when the accounts coincide
+
+**Given** the same company setting, and a draft bill whose single discounted line already uses account **710000 Purchase Discounts**,
+**When** the bill is saved,
+**Then** **no** `discount` item is produced, because the line's own account equals the allocation account.
+
+### T3. Early-payment-discount lines on a bill in the mixed mode
+
+**Given** the vendor's payment term *2/7 Net 30* (early discount on, 2 %, 7 days, one instalment of 100 % at 30 days) with the computation mode `mixed`, and a draft bill of one line: 1 unit at 1 000.00 on 600000 with the tax *Purchase 20 %* (tax-excluded, 100 % to 131000),
+**When** the bill is saved and posted,
+**Then** the entry holds five items: `product` 600000 debit 1 000.00 carrying the tax; `epd` 600000 credit 20.00 carrying the tax; `epd` 600000 debit 20.00 with the taxes cleared; `tax` 131000 debit 196.00; `payment_term` 400000 credit 1 196.00;
+**and** both `epd` items are labelled *Early Payment Discount (2.0%)*;
+**and** the expense account nets to 1 000.00 while the deductible input tax is 196.00 rather than 200.00.
+
+### T4. The same term in the other two modes produces no such line
+
+**Given** the same bill but the computation mode `included` (*On early payment*), and then `excluded` (*Never*),
+**When** the bill is saved in each case,
+**Then** no `epd` item exists in either case, the tax is 200.00 and the total is 1 200.00.
+
+### T5. A fixed-amount duty is not discounted
+
+**Given** the bill of T3 with a second tax on the line: a fixed amount of 5.00 per unit,
+**When** the bill is saved,
+**Then** the fixed-amount tax is dispatched out of the base lines before the early-discount aggregation, so it is **not** among the taxes carried by the base-shift item and the discount is not applied to the amount it represents;
+**and** the amount of that fixed tax is therefore not reduced by the two per cent.
+
+### T6. Private-share lines on a foreign-currency bill
+
+**Given** a bill written in United States dollars at a document rate of 1.25 dollars per euro, company currency Euro, with one line of 100.00 dollars at 75 % deductibility and a 20 % purchase tax,
+**When** the bill is saved,
+**Then** the `non_deductible_product` item carries **balance −25.00 and amount in currency −20.00**, and the `non_deductible_product_total` item carries **balance +25.00 and amount in currency +20.00** — the two currency columns exchanged with respect to every other item of the entry (**compatibility finding**, `calculations.md` §10);
+**and** a rebuild implementing the corrected behaviour produces −20.00 / −25.00 and +20.00 / +25.00 respectively.
+
+### T7. Auto-complete appends the lines of an earlier bill
+
+**Given** a posted bill of two lines (*Office chair* 800.00 and *Desk lamp* 160.00) in United States dollars with fiscal position *Reverse charge*, and a new draft bill of the same company already carrying one typed line *Courier* 30.00, in Euro, with no fiscal position and vendor *Alpha Supplies*,
+**When** the earlier bill is chosen in the **Auto-Complete** picker,
+**Then** the draft carries **three** lines: *Courier* 30.00, *Office chair* 800.00 and *Desk lamp* 160.00 — the copies are appended, nothing is replaced;
+**and** the draft's currency becomes United States dollars and its fiscal position becomes *Reverse charge*;
+**and** the vendor stays *Alpha Supplies*, and the bill date, accounting date, vendor reference, payment reference, payment term, recipient bank account and journal are unchanged;
+**and** the picker is empty again, so nothing records that the auto-complete happened.
+
+### T8. Choosing the same source twice appends twice
+
+**Given** the draft of T7 after the auto-complete,
+**When** the same earlier bill is chosen again,
+**Then** the draft carries **five** lines: *Courier*, *Office chair*, *Desk lamp*, *Office chair*, *Desk lamp*.
+
+### T9. A decoder refuses a document that already has lines
+
+**Given** a draft bill that already carries one product line, and a file whose decoder consults the standard refusal helper,
+**When** the decoding contract runs on that file,
+**Then** nothing is written to the document;
+**and** its chatter receives *Attachment «the file name» not imported: The invoice already contains lines.*
+
+### T10. Purchase-order linking from the decoding path
+
+**Given** an empty bill created from an uploaded file, and a decoder that adds two lines and no line existed before,
+**When** the decoding contract completes,
+**Then** the two lines are marked imported;
+**and** the purchase-order matching hook is called once with a **four-second** budget, not the ten seconds of the manual path;
+**and** when that hook raises a user error, the failure is logged as *Failed to link bill to purchase order* and the import still succeeds with the two lines in place;
+**and** the post-processing hook runs afterwards in every one of those cases.
+
+### T11. No purchase-order linking when the document already had lines
+
+**Given** an existing draft bill that already carries one line, and an attachment posted on it by an internal user whose decoder adds two more lines,
+**When** the decoding contract completes,
+**Then** the two new lines are marked imported;
+**and** the purchase-order matching hook is **not** called from this path;
+**and** the post-processing hook still runs.
+
+### T12. The journal-subscriber notification after decoding
+
+**Given** a purchase journal carrying one notification address, and a file uploaded onto it whose decoder succeeds,
+**When** the newly created document finishes decoding,
+**Then** the document's portal access token exists and has been written before the notification is composed;
+**and** one *Journal Notification* mail is sent to that address, carrying a copy of every attachment of the document and of the decoded group, each copy named `MAIL_` followed by the original name;
+**and** when the sending fails, the failure is logged and the document, its lines and its attachments are kept exactly as decoded.
+
+### T13. Every write marks the document as manually modified
+
+**Given** a bill created from an uploaded file and decoded, whose manually-modified flag is false,
+**When** any routine writes any field on it without naming that flag and without the suppression marker — for example another domain writing the delivery date,
+**Then** the flag becomes true in the same write;
+**and** the automatic-posting learning wizard no longer opens for that document, and the vendor's run of unmodified bills is broken at it (**compatibility finding**, `business-rules.md` §19).
+
+### T14. Posting does not mark the document
+
+**Given** the same decoded bill with the flag false,
+**When** it is posted,
+**Then** the flag is still false, because the whole posting routine carries the suppression marker;
+**and** the learning wizard may therefore open, subject to the other eight conditions of `workflows.md` §8.3.
+
+### T15. Naming an extra recipient grants portal access to a bill
+
+**Given** a posted vendor bill whose partner is *Papeterie Lambert*, and a contact *Auditor* who is neither that partner nor an internal user,
+**When** a chatter message is posted on the bill naming *Auditor* as an extra recipient,
+**Then** the bill's portal access token is generated if it did not exist;
+**and** *Auditor* is placed in the additional-intended-recipient group, which is evaluated before every other recipient group;
+**and** the notification sent to *Auditor* carries a button leading to the bill's portal page with that token, so *Auditor* can read the bill without any further permission being granted.

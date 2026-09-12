@@ -42,6 +42,8 @@ The **purchase journal** chosen on the document. Its numbering series gives the 
 | 1..n | `product` | the expense account chosen by `calculations.md` §6.2 | **debit** | `+ price_subtotal` of the line, as returned by the tax engine after rounding and delta distribution | `+ price_subtotal ÷ document_rate`, rounded to the company currency |
 | n+1..m | `tax` | the account of the tax distribution line that produced it (the **purchase** distribution for a bill, the **refund** distribution for a vendor credit note) | **debit** for an ordinary deductible purchase tax; credit when the distribution factor is negative (reverse charge) | `+ tax amount` aggregated per accounting grouping key | the same, converted |
 | optional | `rounding` | the cash rounding rule's **loss** account when the adjustment reduces what is owed, its **profit** account otherwise | either | the cash rounding difference | the same, converted |
+| optional, always in pairs | `discount` | **first line of the pair**: the same expense account as the product line it derives from. **Second line of the pair**: the company's *Vendor Bills Discounts Account* (`account_discount_income_allocation_id`) | first line **debit**, second line **credit**, on a bill | the discounted part of the line, `+ round_to(document_currency, quantity × unit price × discount percentage ÷ 100)`, and its negative | the same amount divided by the document rate and rounded to the company currency, and its negative |
+| optional, always in pairs | `epd` | **both lines of the pair**: the same expense account as the product lines they derive from | first line **credit**, second line **debit**, on a bill | the early payment discount on the group's untaxed total, `− round_to(document_currency, group untaxed total × discount percentage ÷ 100)` on the first line and its positive on the second | the same computation carried out independently in the company currency |
 | optional | `non_deductible_product` | the **same expense account as the product line it derives from** | **credit** | `− non_deductible_base` (see `calculations.md` §10) | the same, converted |
 | optional | `non_deductible_product_total` | the journal's **private share account**, falling back to its default account | **debit** | the sum of the private bases | the same, converted |
 | optional | `non_deductible_tax` | the journal's **private share account**, falling back to its default account (or the account already on an existing such line) | **debit** | the tax on the private bases | the same, converted |
@@ -49,15 +51,17 @@ The **purchase journal** chosen on the document. Its numbering series gives the 
 
 There is **one payable term line per distinct maturity date** produced by the payment term, merged when two instalments fall on the same day. Each carries its own **maturity date**, and, when the term grants an early discount, its **discount date**, **discounted amount in currency** and **discounted balance**.
 
+The two pair-forming line kinds are detailed in §2.6 and §2.7. Both are produced by the **core synchronizer of this domain**, on a vendor bill exactly as on a customer invoice; neither comes from another domain.
+
 Section, subsection and note lines carry no account and no amount and are not part of the entry in the accounting sense.
 
 ### 2.3 Sequence of the lines
 
-Presentation and product lines keep sequence 100 (or whatever the user ordered them to); tax lines get 10000; rounding lines 11000; payable term lines 12000. The private-share product lines get *(product line sequence + 1)*; the private-share totals get *(highest sequence + 1)*.
+Presentation and product lines keep sequence 100 (or whatever the user ordered them to); tax lines get 10000; rounding lines 11000; payable term lines 12000. The private-share product lines get *(product line sequence + 1)*; the private-share totals get *(highest sequence + 1)*. The `discount` and `epd` lines are created without any sequence of their own, so they fall to the **default 100** — the same band as the product lines, and therefore above the tax lines in the printed order.
 
 ### 2.4 Reconciliation behaviour
 
-- Expense, tax, rounding and private-share lines are **not** reconcilable (their accounts normally are not).
+- Expense, tax, rounding, private-share, discount-allocation and early-payment-discount lines are **not** reconcilable: they sit on expense, tax, income or allocation accounts, none of which is normally marked reconcilable, and none of them carries a maturity date.
 - The payable term lines are on a **reconcilable** account and become the counterpart of outgoing payments, of vendor credit notes and of miscellaneous entries.
 - A term line with a zero amount is still produced when the document total is zero; such a document is immediately treated as paid.
 
@@ -143,6 +147,111 @@ amount_residual_signed= − 1 128.00
 ```
 
 *Variant — the bill in a foreign currency.* Same bill written in United States dollars with a document rate of 1.20 dollars per euro. The commercial amounts stay 800.00, 160.00, 144.00, 24.00 and 1 128.00 **dollars**; every balance becomes the dollar amount divided by 1.20 and rounded to the euro: 666.67; 133.33; 120.00; 20.00; and the term line −940.00. Note 666.67 + 133.33 + 120.00 + 20.00 = 940.00 exactly, because the tax engine distributes the rounding delta onto the first line of each group; when it does not, the term line, being the balance, absorbs the residue so that the entry still balances.
+
+### 2.6 The discount-allocation lines on a vendor bill
+
+**When they exist.** A pair is produced for a product line when **all** of these hold:
+
+1. the company has named a *Vendor Bills Discounts Account* (`account_discount_income_allocation_id`) — the setting is company-wide and direction-specific, the customer-invoice counterpart being a different account;
+2. the line's display type is `product`;
+3. the line's own account **differs** from that allocation account;
+4. the discounted amount computed below is **not zero** in the document currency.
+
+**The amounts.** For each qualifying product line:
+
+```formula
+discounted_amount_in_currency = round_to(document_currency, direction_sign × quantity × unit_price × discount_percentage ÷ 100)
+discounted_balance            = round_to(company_currency, discounted_amount_in_currency ÷ document_rate)
+```
+
+`direction_sign` is +1 on a purchase document (`calculations.md` §1). `discount_percentage` is the per-line discount, not the payment term's early discount. The line's own subtotal is already net of that discount, so these two lines put the discounted part back where it came from and recognise it separately.
+
+**The two items.**
+
+| Item | Account | Side on a bill | Amount in document currency | Balance | Taxes | Analytic distribution |
+|---|---|---|---|---|---|---|
+| base line | the product line's **own account** | debit | `+ discounted_amount_in_currency` | `+ discounted_balance` | **none** — the pair carries no tax and therefore changes no tax base | the weighted mix described below |
+| counterpart | the company's **Vendor Bills Discounts Account** | credit | `− discounted_amount_in_currency` | `− discounted_balance` | none | the same weighted mix |
+
+**Merging.** Items are keyed by *(document, account, document rate)*, so every product line that shares an account and a rate contributes to **one** item on that account and to **one** item on the allocation account. Two product lines on two different expense accounts therefore produce two base items and one merged counterpart item.
+
+**Analytic distribution of a merged item.** Each contributing line's amount is split over the analytic accounts of its own distribution, the split amounts are summed per analytic account across the whole key, and the merged item's distribution is each analytic account's share of that sum, as a percentage. When the total is zero the divisor is taken as 1 so that the computation cannot fail; the resulting percentages are then all zero.
+
+**Other attributes.** Label *Discount*; no maturity date; no sequence of its own, so sequence 100; the document's commercial partner, accounting date and currency, like every other item; not reconcilable.
+
+**Worked example.** A bill in the company currency (rate 1.00) with one line: 10 units of a service at 50.00 each with a 10 % line discount, expense account 600000, no tax, no analytic distribution; the company's Vendor Bills Discounts Account is **710000 Purchase Discounts**.
+
+```formula
+line subtotal                 = round_to(Euro, 10 × 50.00 × (1 − 10 ÷ 100)) = 450.00
+discounted_amount_in_currency = round_to(Euro, +1 × 10 × 50.00 × 10 ÷ 100)  = 50.00
+discounted_balance            = round_to(Euro, 50.00 ÷ 1.00)                = 50.00
+```
+
+| Line | Display type | Account | Debit | Credit |
+|---|---|---|---|---|
+| 1 | `product` | 600000 Expenses | 450.00 | — |
+| 2 | `discount` | 600000 Expenses | 50.00 | — |
+| 3 | `discount` | 710000 Purchase Discounts | — | 50.00 |
+| 4 | `payment_term` | 400000 Account Payable | — | 450.00 |
+
+Totals: debit 500.00, credit 500.00. ✓ The expense account carries the gross 500.00 and the discount obtained appears as 50.00 on its own account, while the supplier is owed the net 450.00.
+
+The shared algorithm, common to bills and to customer invoices, is in [`../accounts-receivable/calculations.md`](../accounts-receivable/calculations.md) §5; the setting is listed in [`../accounts-receivable/configuration.md`](../accounts-receivable/configuration.md).
+
+### 2.7 The early-payment-discount lines on a vendor bill
+
+**When they exist.** A pair is produced when the document's payment term has the early discount **enabled** *and* its computation mode is `mixed` (*Always (upon invoice)*), for every product line of the document that carries at least one tax. No condition restricts this to sale documents: a bill whose **vendor** payment term grants an early discount in that mode produces the pair exactly as a customer invoice does. In the other two modes — `included` (*On early payment*) and `excluded` (*Never*) — no such line exists, because the tax base is not reduced at the moment the document is written.
+
+**Why the pair exists.** In the `mixed` mode the tax is computed on the base **already reduced** by the early discount, whether or not the discount is eventually taken. The pair does that without touching the expense figure: one item carries the taxes and the negative amount, so the tax engine sees a smaller base; the other carries the same account with the taxes cleared and the positive amount, so the expense account nets back to its full value.
+
+**Which taxes take part.** Before anything is aggregated, the taxes that **cannot be discounted** — those whose amount is a fixed amount per unit, and those computed by a stored formula — are dispatched out of the base lines. Neither the discount amount nor the tax set of the pair includes them, so a fixed-amount duty is never reduced by an early payment discount.
+
+**Grouping.** The remaining base lines are aggregated by *(account, analytic distribution, set of taxes)*. One pair is produced per group.
+
+**The amounts of a group.**
+
+```formula
+group_discount_in_currency = round_to(document_currency, direction_sign × group_untaxed_total_in_document_currency × discount_percentage ÷ 100)
+group_discount_in_company  = round_to(company_currency,  direction_sign × group_untaxed_total_in_company_currency  × discount_percentage ÷ 100)
+```
+
+Each of the two totals is then **distributed over the base lines of the group** by the smooth-delta distribution — the same routine that spreads a rounding delta — each line's share being proportional to its own unrounded untaxed total, and the shares summing back exactly to the total. The distribution is run twice and independently, once with the document currency's number of decimal places and once with the company currency's, so the two columns each add up exactly in their own currency.
+
+**The two items.**
+
+| Item | Account | Side on a bill | Amount in document currency | Balance | Taxes |
+|---|---|---|---|---|---|
+| base-shift item | the group's **account**, that is the expense account of the product lines it aggregates | credit | `− group_discount_in_currency` | `− group_discount_in_company` | the group's **discountable taxes**, kept, so the taxable base falls by this amount |
+| counterpart item | the **same account** | debit | `+ group_discount_in_currency` | `+ group_discount_in_company` | **cleared** |
+
+Both carry the group's **analytic distribution**, unchanged; the counterpart is keyed only by account and analytic distribution, so the counterparts of two groups that differ only by their tax set merge into one item.
+
+**Other attributes.** The label of both items is *Early Payment Discount («the term's discount percentage»%)* — the stored percentage written out as a decimal number, followed immediately by a per-cent sign, the whole inside parentheses; a term of two per cent therefore produces *Early Payment Discount (2.0%)*. No maturity date; no sequence of its own, so sequence 100; the document's commercial partner, accounting date and currency; not reconcilable.
+
+**Net effect.** Zero on the expense account, and a reduction of the taxable base — and therefore of the deductible input tax — by the discount percentage.
+
+**Worked example.** A bill in the company currency (rate 1.00). Vendor payment term *2/7 Net 30*: early discount on, 2 %, within 7 days, one instalment line of 100 % at 30 days, computation mode `mixed`. One product line: 1 unit at 1 000.00 on expense account 600000, one tax *Purchase 20 %*, tax-excluded, distributing 100 % to 131000 Tax Paid. No analytic distribution.
+
+```formula
+group untaxed total        = 1 000.00
+group_discount_in_currency = round_to(Euro, +1 × 1 000.00 × 2 ÷ 100) = 20.00
+group_discount_in_company  = round_to(Euro, +1 × 1 000.00 × 2 ÷ 100) = 20.00
+taxable base after the pair = 1 000.00 − 20.00 = 980.00
+tax                        = round_to(Euro, 980.00 × 20 ÷ 100) = 196.00
+document total             = 1 000.00 + 196.00 = 1 196.00
+```
+
+| Line | Display type | Account | Taxes | Debit | Credit |
+|---|---|---|---|---|---|
+| 1 | `product` | 600000 Expenses | Purchase 20 % | 1 000.00 | — |
+| 2 | `epd` | 600000 Expenses | Purchase 20 % | — | 20.00 |
+| 3 | `epd` | 600000 Expenses | none | 20.00 | — |
+| 4 | `tax` | 131000 Tax Paid | — | 196.00 | — |
+| 5 | `payment_term` | 400000 Account Payable | — | — | 1 196.00 |
+
+Totals: debit 1 216.00, credit 1 216.00. ✓ The expense account nets to 1 000.00; the deductible tax is 196.00 rather than 200.00; the supplier is owed 1 196.00, of which 1 176.00 if the bill is settled within seven days — the discounted amount and the discount date are carried by the payable term line, as `calculations.md` §5.3 describes.
+
+The shared algorithm and the three computation modes are in [`../accounts-receivable/calculations.md`](../accounts-receivable/calculations.md) §4.3 and §4.4; the write-off booked when the discount is actually taken at payment time belongs to [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/).
 
 ---
 
@@ -428,11 +537,11 @@ Company A owes its supplier; company B paid on A's behalf. After the two entries
 | journal | the chosen journal, or the source's journal |
 | payment term | **cleared** |
 | debit origin | the source |
-| lines | **removed** unless the *Copy Lines* switch was set; never copied when the source is a credit note |
+| lines | **removed** unless the *Copy Lines* switch was set. The switch is hidden by the dialogue when the source is a credit note, and defaults to off, so a debit note raised from a credit note through the dialogue carries no line; a caller that sets the switch directly on a credit-note source does get the lines copied. See the compatibility finding in `business-rules.md` §11 |
 
 When the journal has a **dedicated debit note sequence** and the resulting document is a bill or a customer invoice, its numbering series is prefixed with the letter `D` — that is, the starting sequence becomes `D` followed by the journal's normal starting sequence — and the "last number" search is restricted to documents that likewise do or do not have a debit origin, so the two series never interfere.
 
-The chatter of the source records *This debit note was created from: «link»*.
+The chatter of the **debit note** — the new document, not the source — records *This debit note was created from: «link»*, the link pointing at the source document. This is the debit-note variant of the copy message described in `entities.md` §1.6: the message is always logged on the copy, and always names the original.
 
 Its posting produces the ordinary lines of §2.
 
@@ -456,6 +565,8 @@ Totals: debit 145.00, credit 145.00. ✓
 Reading it: the expense account keeps 75.00 net (100.00 debit less 25.00 credit); the private share account carries 25.00 of expense plus 5.00 of non-reclaimable tax; the tax authority is owed 15.00 rather than 20.00; and the supplier is still owed the full 120.00.
 
 The labels of the two aggregate lines become *«document number» - private part* and *«document number» - private part (taxes)* at posting.
+
+The example above is written in the company currency, so the two private-share lines show the same figure in both columns. On a foreign-currency bill the two columns of those two lines are exchanged with respect to every other line of the entry; the observed assignment, a worked example and the corrected behaviour are the compatibility finding in `calculations.md` §10.
 
 ---
 

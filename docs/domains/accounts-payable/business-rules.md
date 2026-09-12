@@ -30,7 +30,7 @@ Every rule below is stated with its exact trigger, its condition and the exact u
 |---|---|
 | A creation payload asks for the `posted` status directly | *You cannot create a move already in the posted state. Please create a draft move and post it after.* |
 
-After creation the *manually modified* flag is forced to false, so that a decoder's output is not counted as a human edit.
+After creation the *manually modified* flag is forced to false, so that a decoder's output is not counted as a human edit. The complete rule for that flag — including the fact that **every** later write sets it unless the write is one of five suppressed operations — is §19.
 
 ### 2.2 Write on any document
 
@@ -302,7 +302,17 @@ Voiding is offered only when the payment method is the cheque method, the paymen
 | Any selected source already has a debit note | *You can't make a debit note for an invoice that is already linked to a debit note.* |
 | Any selected source is not a customer invoice, a customer credit note, a vendor bill or a vendor credit note | *You can make a debit note only for a Customer Invoice, a Customer Credit Note, a Vendor Bill or a Vendor Credit Note.* |
 
-The *Copy Lines* switch is silently ignored when the source is a credit note.
+**The *Copy Lines* switch and a credit-note source — compatibility finding.**
+
+*Intent.* The switch's own help text states the intent: *In case you need to do corrections for every line, it can be in handy to copy them.  We won't copy them for debit notes from credit notes. *
+
+*Observed behaviour.* The lines of the source are removed from the debit note when the switch is off. The additional test meant to remove them as well when the source is a vendor credit note or a customer credit note **never matches**: it compares the source's document type, which is a single stored value such as `in_refund`, against a list holding one pair of values rather than against the two values themselves, so no document type can ever satisfy it. The guard therefore reduces to "the switch is off".
+
+*Why it is not normally visible.* The dialogue **hides** the *Copy Lines* switch as soon as the common type of the selected sources is `in_refund` or `out_refund`, and the switch's default is off. A user working through the dialogue therefore never copies the lines of a credit note, which is why the intended behaviour appears to hold.
+
+*What does happen.* A caller that reaches the wizard without the form — an integration, a scripted mass action, or any code that sets the switch directly — and raises a debit note from a **posted vendor credit note** with *Copy Lines* on **does** get the credit note's lines copied onto the debit note.
+
+Recorded as observed and marked a **compatibility finding**. A corrected behaviour would compare the source's document type against the two credit-note values individually, so that the copy is refused for a credit-note source however the wizard is driven; the help text would then be accurate. A rebuild that implements the corrected behaviour changes only the programmatic path, never what a user sees.
 
 ---
 
@@ -321,6 +331,25 @@ The *Copy Lines* switch is silently ignored when the source is a credit note.
 | Creation from attachments produced a document that could not be extended | its chatter receives *There was an error while importing the bill, you can find attached the incoming XML* |
 
 The decoding of a message posted on an **existing** document only runs when the posting user is **active and internal**. A message from a supplier therefore never rewrites a bill.
+
+### 12.1 The decoder outcomes and the standard refusal reason
+
+A decoder ends in exactly one of four ways. The first three are listed in the table above and repeated here beside the fourth, so that the whole contract is in one place:
+
+| Outcome | What the decoder returns or raises | What the document receives |
+|---|---|---|
+| Success | nothing | the decoded values; the lines it added are marked imported; no chatter message about the outcome itself |
+| Refusal | a reason, as text | *Attachment «the file name» not imported: «the reason»* in the chatter; nothing was written to the document |
+| Redirecting refusal | a redirecting warning | the warning is re-raised so the user is offered the navigation it carries |
+| Failure | any other error | the transaction is rolled back and the chatter receives, with elevated privileges, *Error importing attachment «the descriptor»:* then *This specific error occurred during the import:* then the error text |
+
+The base package supplies **one ready-made reason** so that every decoder refuses the commonest case with the same words. A decoder that calls it on a document which **already carries invoice lines** gets back the text
+
+> The invoice already contains lines.
+
+and nothing at all when the document has no invoice line — so the same call both tests the condition and produces the reason. Substituted into the refusal message, a file named `bill-4471` therefore produces the chatter line *Attachment bill-4471 not imported: The invoice already contains lines.*
+
+Whether a decoder consults this helper is the decoder's own decision: the base package neither calls it nor enforces the condition. It exists so that the wording is identical across every package that does.
 
 ---
 
@@ -378,7 +407,7 @@ The learning wizard opens only under the nine conditions of `workflows.md` §8.3
 | A payment term whose last line is a *fixed* line | It is still treated as the balance line and takes the whole residual; its declared amount is ignored |
 | A payment term line whose day count would land on 31 February | The month-addition clamps to the last valid day |
 | A cheque printed across several stub pages | Only page one is negotiable; later pages show the literal text `VOID` in place of the amount and of the amount in words |
-| A cheque stub that does not fit and multi-page stubs are off | The list is cropped to eight lines and the page is flagged as cropped, so the layout can print an ellipsis |
+| A cheque stub that does not fit and multi-page stubs are off | The list is cropped to eight lines, so the layout can print an ellipsis. The cropped flag itself is set by a **different** test — the payment's entry reconciles more than nine documents — so the two do not always agree; see `calculations.md` §14.5 and §14.6 |
 | A cheque voided and its number re-entered on another payment | Accepted by the uniqueness check, because that check only compares **posted** payments |
 | An imported line whose account was archived after import | Accepted: the archived-account refusal skips lines marked imported |
 | A bill posted while its accounting date falls in a locked period | The accounting date is moved forward silently; the banner warned beforehand |
@@ -402,6 +431,8 @@ An operation on a purchase document passes through five independent layers. All 
 | 3. Field-level groups | Some fields are visible only to a group: the payment widgets and the credit warning to the invoicing or read-only accounting groups; the deductibility column to the partial-deductibility group; the amount in words to the technical-features group | the field is simply absent |
 | 4. Domain rules | The explicit checks of this file: the review authority, the numbering-pattern override, the deletion-in-the-middle-of-a-chain rule | the specific messages listed above |
 | 5. State rules | The guards of `state-machines.md` | the specific messages listed above |
+
+One access path bypasses all five, because it does not go through the document at all: naming a partner as an extra recipient of a chatter message grants that partner tokenised portal access to the document. See §20.
 
 ### 17.1 What each role can do, end to end
 
@@ -449,3 +480,55 @@ Stating the negatives explicitly, because an implementation is easy to over-buil
 | produce any journal entry when printing, unmarking or renumbering a cheque | only posting and voiding move the ledger |
 | create a document from a message with no attachment | the route is dropped and a bounce is sent |
 | decode a file posted by a supplier on an existing document | decoding requires an active internal user |
+
+---
+
+## 19. The manually-modified flag
+
+The document carries a boolean **manually modified** flag (`is_manually_modified`). Its name describes its intent — "a human has touched what a decoder wrote" — but its rule is mechanical and much wider, and the automatic-posting learning run of `workflows.md` §8.3 turns on it, so the rule has to be stated exactly.
+
+### 19.1 The rule
+
+| # | Rule |
+|---|---|
+| M1 | Immediately after a document is created, the flag is forced to **false**, whatever the creation payload said. A decoder's output, a copy, a reversal and a hand-typed draft all start unmarked |
+| M2 | **Every write on the document sets the flag to true**, unless the write itself carries a value for the flag, or the write is made under the **suppression marker**. The flag is set before the write is applied, so it is stored by the same write |
+| M3 | A write that carries its own value for the flag stores that value and nothing overrides it. This is how a caller clears the flag deliberately |
+| M4 | A write made under the suppression marker leaves the flag exactly as it was |
+| M5 | The rule does not look at **what** is written, at **who** writes it, or at **how many** fields change. A write of one unrelated field by a background routine marks the document as manually modified exactly as a human edit of a decoded amount does |
+
+### 19.2 The complete list of operations that carry the suppression marker
+
+Only these five carry it. Everything else marks the document.
+
+| Operation | Why the marker is carried |
+|---|---|
+| **Posting** a document, for the whole of the posting routine | posting writes the number, the status and the line dates; without the marker every posted document would be marked, and no vendor would ever qualify for automatic posting |
+| **Creating documents from uploaded attachments** (`workflows.md` §2 step 6) | the documents are created and then filled by the decoder; that is not a human edit |
+| **Creating a document from the journal's mailbox** (`workflows.md` §3 step 4) | the same, for a document that arrives by electronic mail |
+| **Creating the further documents split off from one mail** (`workflows.md` §3 step 8.4), when a message carries several business documents | the same, for the copies |
+| **Writing the flag itself**, by naming it in the write | rule M3 |
+
+### 19.3 Consequences
+
+1. A purely programmatic write from **another domain** — a purchasing routine writing the origin, a reconciliation routine writing a housekeeping field, a localisation writing a delivery date — marks the document as manually modified, even though no person edited anything. That document then fails condition 9 of the automatic-posting learning run of `workflows.md` §8.3, and it also **breaks the run** for the vendor: the walk over the ten most recent bills of that vendor stops at the first marked document, so one programmatic write can hold a vendor below the threshold of three indefinitely.
+2. Because posting carries the marker, a document that is captured, decoded and posted without a human touching it stays unmarked, which is exactly the population the learning run is meant to count.
+3. Because creation forces the flag false **after** the creation payload is applied, a creation that explicitly asks for a true flag still ends up false.
+
+**Compatibility finding.** The flag is documented and named as "a user edited a decoded document", but rule M2 makes it "anything wrote to this document outside the five suppressed operations". Recorded as observed. A corrected behaviour would set the flag only for writes that originate from a client session and touch a field a decoder can fill, leaving programmatic writes from other domains alone; a rebuild that does so will offer the automatic-posting wizard **more** often than the observed system, never less.
+
+---
+
+## 20. Access granted by naming an extra recipient on a purchase document
+
+This rule belongs with the access rules because its effect is an access grant, and with the notification list of `interfaces.md` §9.2 because it is reached only through the chatter.
+
+| # | Rule |
+|---|---|
+| P1 | Whenever the recipients of a chatter message are grouped, on any document whose type is not `entry` — every vendor bill, vendor credit note and purchase receipt included — the document's **portal access token is generated** if it does not exist yet. This happens even when the message names no extra recipient at all |
+| P2 | A recipient group is inserted **at the head** of the group list, before every group the messaging machinery would otherwise apply, so it claims its members first and their notification is built from its settings rather than from any later group's |
+| P3 | A partner belongs to that group when **all three** hold: the partner is among the recipients named on the message; the partner is **not** the document's own partner; and the partner is **not** of the internal-user kind |
+| P4 | Every member receives a notification carrying a button that leads to the document's portal page, addressed with the document's access token |
+| P5 | There is no further check. Naming a partner as an extra recipient on a message posted on a vendor bill is therefore, by itself, a grant of read access to that bill through the portal, for anyone who holds the link |
+
+The portal page itself, and what a visitor holding the token may see and do there, belong to [`../customer-portal/`](../customer-portal/).

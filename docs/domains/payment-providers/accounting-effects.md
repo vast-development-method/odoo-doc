@@ -46,20 +46,20 @@ The guard "the operation is not `validation`" reflects that a validation amount 
 |---|---|
 | `amount` | The absolute value of the transaction amount. A Payment amount is always zero or positive; the direction carries the sign. |
 | `payment_type` | `inbound` when the transaction amount is strictly positive, `outbound` when it is negative. A refund transaction therefore always produces an outbound payment. |
-| `currency` | The transaction currency. |
-| `partner` | The **commercial contact** of the transaction's contact, in order that a payment made by a delivery address settles the invoices of the customer company. |
+| `currency_id` | The transaction currency. |
+| `partner_id` | The **commercial contact** of the transaction's contact, in order that a payment made by a delivery address settles the invoices of the customer company. |
 | `partner_type` | `customer`. |
-| `journal` | The provider's `journal`. |
-| `company` | The provider's company. |
-| `payment_method_line` | The inbound payment method line of that journal whose `payment_provider` is the transaction's provider. |
-| `payment_token` | The transaction's token, when it has one. |
-| `payment_transaction` | The transaction. |
+| `journal_id` | The provider's `journal_id`. |
+| `company_id` | The provider's company. |
+| `payment_method_line_id` | The inbound payment method line of that journal whose `payment_provider_id` is the transaction's provider. |
+| `payment_token_id` | The transaction's token, when it has one. |
+| `payment_transaction_id` | The transaction. |
 | `memo` | The transaction reference, then a space, a hyphen and a space, then the provider reference, or nothing when there is no provider reference. |
-| `invoices` | The invoices linked to the transaction. |
+| `invoice_ids` | The invoices linked to the transaction. |
 | `write_off_line_vals` | Empty, except for the early payment discount case of section 4. |
-| `destination_account` | The account of the first payment-term journal item found on the linked invoices, when there is one; otherwise the Payment domain's own default (the receivable account of the contact). |
+| `destination_account_id` | The account of the first payment-term journal item found on the linked invoices, when there is one; otherwise the Payment domain's own default (the receivable account of the contact). |
 
-The Payment is created and then posted at once. Its identifier is written back on the transaction's `payment` field, which makes the relation one-to-one in practice.
+The Payment is created and then posted at once. Its identifier is written back on the transaction's `payment_id` field, which makes the relation one-to-one in practice.
 
 ### 3.1 The resulting journal entry, for an inbound payment
 
@@ -134,7 +134,7 @@ The resulting journal entry therefore carries, besides the two lines of section 
 | A transaction that had produced a Payment reaches `cancel` | The Payment is cancelled. Cancelling a posted Payment is the Payment domain's own operation: it reverses or resets the journal entry according to that domain's rules, and undoes the reconciliation. |
 | A transaction reaches `error` after having produced a Payment | Nothing happens automatically. The only path into `error` from `done` is the Stripe refund reversal, and it concerns a refund transaction; the accountant must then reverse the refund Payment by hand. The connector's message states this explicitly: `The refund did not go through. Please log into your Stripe Dashboard to get more information on that matter, and address any accounting discrepancies.` |
 | A void child reaches `cancel` | No Payment exists for it, therefore the cancellation branch finds nothing to cancel. |
-| A refund is issued | A new outbound Payment is created; the original Payment is untouched, and the link between the two is kept through `source_payment` on the refund Payment. |
+| A refund is issued | A new outbound Payment is created; the original Payment is untouched, and the link between the two is kept through `source_payment_id` on the refund Payment. |
 
 ---
 

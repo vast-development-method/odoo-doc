@@ -299,6 +299,16 @@ today.
 **Partial reconciliation.** The record linking one debit line to one credit line with an amount,
 reducing both residuals.
 
+**Payment journal of a provider** (`journal_id` on `payment.provider`). The bank journal in which a
+payment produced by a successful online transaction is recorded. It is derived from, and writes back
+to, the provider's payment method line; see [`entities.md`](entities.md) section 13.
+
+**Payment link.** The address a customer follows to pay one document online, composed by the payment
+link wizard: the document's portal address, the four query parameters that carry the document, the
+amount, a signed token and the payment flag, and the anchor that scrolls to the payment block. The
+same address is what the portal-link quick response code encodes. See
+[`entities.md`](entities.md) section 14.
+
 **Payment reference** (`payment_reference`). The string the customer is asked to quote when paying,
 so the incoming bank line can be matched automatically. Computed at posting from the journal's
 reference model and type.
@@ -313,6 +323,11 @@ payment discount.
 1. **On a payment term** (`account.payment.term.line`): one rule saying how much and when.
 2. **On a document** (display type `payment_term`): one receivable journal item carrying one
    instalment and its maturity date.
+
+**Payment transaction.** One attempt to pay a document through an online provider. A document holds
+its transactions in `transaction_ids`; a transaction reaching the done state posts a draft document,
+creates the payment and reconciles it. The transaction entity itself is defined in
+[`../payment-providers/glossary.md`](../payment-providers/glossary.md).
 
 **Percent line.** A payment term line whose kind is `percent`: it takes a share of the document
 total.
@@ -407,6 +422,11 @@ original side rather than as an amount on the opposite side.
 **Structured creditor reference.** An international payment reference of the form `RF`, two check
 digits, then the data, grouped in fours. Its check digits are computed with modulo ninety-seven
 arithmetic over the data with the letters replaced by two-digit numbers.
+
+**Subscription subtype.** A named category of thread message that a follower may subscribe to. This
+domain ships three for the document thread — Validated, Paid and the hidden Invoice Created — and
+none of them is a default subscription. Which one a tracked change carries is in
+[`interfaces.md`](interfaces.md) section 7.4.
 
 **Suspense account.** The company account used as the last resort by the automatic balancing line.
 

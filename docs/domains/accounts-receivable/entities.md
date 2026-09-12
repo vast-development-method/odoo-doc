@@ -134,7 +134,7 @@ price into an accounting balance.
 
 | Field (storage name) | Type | Meaning and rules |
 | --- | --- | --- |
-| Partner (`partner_id`) | many-to-one to Partner | The customer. Tracked. Indexed. Company-checked. Participates in default-value propagation. Deletion is restricted: a partner referenced by a document cannot be deleted. Writing it re-stamps the commercial entity on every journal item of the document. |
+| Partner (`partner_id`) | many-to-one to Partner | The customer. Tracked. Indexed. Company-checked. Participates in default-value propagation. Deletion is restricted: a contact named by a draft or posted journal entry cannot be deleted, and the refusal reads "The partner cannot be deleted because it is used in Accounting" (see [`business-rules.md`](business-rules.md) section 6.2). Writing it re-stamps the commercial entity on every journal item of the document. |
 | Commercial Entity (`commercial_partner_id`) | many-to-one to Partner | Computed and stored, readonly, company-checked, deletion restricted. The commercial parent of the partner (the invoicing company behind a contact). Every accountable journal item carries this partner, not the contact. |
 | Delivery Address (`partner_shipping_id`) | many-to-one to Partner | Computed and stored with manual override, precomputed, company-checked. For an invoice it is the delivery address resolved from the partner; otherwise empty. It feeds the fiscal position resolution. |
 | Recipient Bank (`partner_bank_id`) | many-to-one to Partner Bank Account | Computed and stored with manual override. Tracked. Indexed when not null. Deletion restricted. Company-checked. For an inbound document (customer invoice, sales receipt, vendor credit note) with a preferred inbound payment method whose journal has a bank account, that bank account is used. Otherwise the bank accounts of the *bank partner* are filtered to the company and to the active ones, then sorted by two keys: first, accounts whose currency equals the document currency or that have no currency; second, accounts that are allowed for outgoing payments come after those that are not. The first of the sorted list is taken. |
@@ -797,7 +797,7 @@ Invoice Send Wizard (`account.move.send.wizard`) and Invoice Batch Send Wizard
 (`account.move.send.batch.wizard`) are transient: they hold the user's choices for one sending
 operation and are discarded afterwards. Both fields tables are below; the sending algorithm they
 drive is in [`workflows.md`](workflows.md) section 3, and the dialogues that render them are in
-[`interfaces.md`](interfaces.md) section 9.6.
+[`interfaces.md`](interfaces.md) section 14.
 
 Both wizards share one behaviour contract, contributed by the sending capability they both build on:
 the default channels, the default extra electronic deliveries, the default electronic format, the
@@ -916,14 +916,20 @@ journal entry, it has to be posted first."*
 Debit Note Wizard (`account.debit.note`). Transient. A debit note charges the customer *more* for an
 already invoiced transaction, as a new document of the same type as the original.
 
-| Field (storage name) | Type | Meaning and rules |
-| --- | --- | --- |
-| Journal Entries (`move_ids`) | many-to-many to Journal Entry | The source documents. |
-| Reason (`reason`) | text | Copied into the reference of the debit note. |
-| Debit note date (`date`) | date | The accounting date of the debit note. |
-| Copy lines (`copy_lines`) | boolean | When true, the product lines of the source are copied into the debit note; when false the debit note starts empty. Only offered when every source document shares the same document type. |
-| Journal (`journal_id`) | many-to-one to Journal | The journal of the debit note; defaults to the source journal. |
-| Move type (`move_type`) | selection | Informational: the type of the source. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+| --- | --- | --- | --- |
+| `move_ids` | Journal Entries | many-to-many to Journal Entry | The source documents, held in the association table `account_move_debit_move` whose column `debit_id` holds the wizard and whose column `move_id` holds the source. Restricted to posted documents. Filled from the records the user selected. |
+| `reason` | Reason | text | Copied into the reference of the debit note. |
+| `date` | Debit Note Date | date | Required, default today. The accounting date of the debit note, and its document date when it is an invoice. |
+| `copy_lines` | Copy Lines | boolean | Default false. When true, the lines of the source are copied into the debit note; when false the debit note starts empty. The form hides the checkbox when the common source type is a credit note, but hiding it does not force it to false, and the checkbox reappears as soon as the selected sources have mixed types. See the compatibility finding in [`accounting-effects.md`](accounting-effects.md) section 5. |
+| `journal_id` | Use Specific Journal | many-to-one to Journal | The journal of the debit note. Left empty it means "the journal of the document being debited". The selector is restricted to journals whose kind equals the computed journal kind below. |
+| `move_type` | Move type | text | Computed, not stored. The document type shared by every source: the type of the single source, or, with several sources, their common type when they all share one, and empty when they do not. |
+| `journal_type` | Journal kind | text | Computed, not stored, from the previous field. It is `purchase` when the common source type is `in_invoice` (Vendor Bill) or `in_refund` (Vendor Credit Note), and `sale` in every other case — including the case where the sources have mixed types and the common type is therefore empty, which falls back to `sale`. It is the value that restricts the journal selector, so a mixed selection of customer and vendor documents offers only sale journals. |
+| `country_code` | Country code | text | Related to the country code of the source documents' company. It carries no behaviour of its own; it exists so that a country-specific capability can show or hide its own fields on this dialogue. |
+
+**Validation** is in [`business-rules.md`](business-rules.md) section 13.2. The dialogue is titled
+"Create Debit Note" and its confirming button is labelled "Create Debit Note"; what it produces is in
+[`accounting-effects.md`](accounting-effects.md) section 5.
 
 ---
 
@@ -956,3 +962,179 @@ erDiagram
     JOURNAL_ITEM }o--o{ TAX : taxed_by
     JOURNAL_ITEM }o--o| PRODUCT : bills
 ```
+
+---
+
+## 13. Payment Provider in its receivable role
+
+Payment Provider (`payment.provider`, table `payment_provider`). The provider itself — its
+credentials, its states, its supported features and its transaction lifecycle — belongs to
+[`../payment-providers/entities.md`](../payment-providers/entities.md). This domain owns exactly one
+thing about it: the accounting journal in which a successful online payment lands.
+
+### 13.1 The payment journal
+
+| Field (storage name) | Full name | Type | Rules |
+| --- | --- | --- | --- |
+| `journal_id` | Payment Journal | many-to-one to Journal | Computed with an inverse, not stored, not copied, company-checked against the provider's company, restricted to journals of the bank kind. Its help text reads "The journal in which the successful transactions are posted." |
+
+**Derivation**, re-evaluated whenever the provider's code, its state or its company changes:
+
+1. Look for a payment method line whose payment provider is this provider and whose journal is set;
+   take the first one found and use its journal.
+2. If there is none and the provider's state is the enabled one or the test one, use the first bank
+   journal of the provider's company; and, when the provider already exists as a stored record,
+   immediately run the payment-method-line reconciliation of section 13.2.
+3. Otherwise the field is empty.
+
+**Writing it** runs the same payment-method-line reconciliation.
+
+### 13.2 Keeping the payment method line in step
+
+The rule that turns the chosen journal into a usable accounting setup, run on every write of the
+journal and in the second branch of the derivation above:
+
+1. A provider that has not been stored yet does nothing.
+2. Find the payment method whose code equals the provider's code. If there is none, do nothing.
+3. Find the payment method line that already names this provider and has a journal.
+4. If the provider's journal is now empty: delete that line if it exists, and stop.
+5. If no such line exists, look instead, within the provider's company, for a payment method line
+   whose code equals the provider's code, that names no provider, and that has a journal.
+6. If a line was found by either search, point it at this provider and at the chosen journal, and
+   rename it to the provider's name.
+7. Otherwise create a payment method line with: the provider's name as its name, the payment method
+   of step 2, the chosen journal, this provider, and the outstanding account of section 13.3. When
+   another payment method line with the same code already exists in the company, that line's
+   outstanding account is used instead of the computed one. For the direct-debit provider code the
+   name of the created line is forced to the literal `Online SEPA`.
+
+The line entity, its own fields and its own rules are in
+[`../payments-and-bank-reconciliation/entities.md`](../payments-and-bank-reconciliation/entities.md).
+
+### 13.3 The outstanding account of the created line
+
+1. When the provider's code is the custom one, no outstanding account is set.
+2. Otherwise take the company's chart-of-accounts reference for the outstanding-receipts account when
+   the payment method is inbound, or for the outstanding-payments account when it is outbound,
+   resolved in the context of the company's root company.
+3. When that reference resolves to nothing, use the company's internal transfer account.
+
+### 13.4 What the provider does *not* carry
+
+The switch that decides whether a customer may pay an invoice from the portal is **not** a field on
+the provider. It is the system parameter `account_payment.enable_portal_payment`, documented in
+[`configuration.md`](configuration.md) section 3. A provider being enabled is a separate and
+additional condition, evaluated when the payment form is built.
+
+### 13.5 Removing a provider
+
+Removing a provider deletes the payment method that carries its code. When at least one payment
+already uses that payment method the removal is refused with:
+
+> "You cannot uninstall this module as payments using this payment method already exist."
+
+---
+
+## 14. Payment Link Wizard in its receivable role
+
+Payment Link Wizard (`payment.link.wizard`). Transient. It produces the address a customer follows to
+pay one document, and it is also the producer of the portal-link quick response code printed on the
+document ([`interfaces.md`](interfaces.md) section 9.5). The generic wizard belongs to
+[`../payment-providers/entities.md`](../payment-providers/entities.md); the fields below are what this
+domain adds to it, together with the address composition, which this domain overrides completely.
+
+### 14.1 Fields the receivable role adds
+
+| Field (storage name) | Full name | Type | Rules |
+| --- | --- | --- | --- |
+| `invoice_amount_due` | Amount Due | monetary in the wizard currency | Computed, not stored, recomputed from the maximum payable amount and always equal to it. It exists so the dialogue can show "the whole document" separately from "the amount being asked for". |
+| `open_installments` | Open instalments | structured value | Stored, never translated and excluded from string exports. A list with one entry per unreconciled instalment, each holding the instalment kind, its position number, its residual amount in the document currency and its formatted maturity date. |
+| `open_installments_preview` | Instalment preview | rich text | Computed, not stored, never translated. One block per instalment of the previous field, rendered only when the next field is true. |
+| `display_open_installments` | Show the instalments | boolean | Computed, not stored. True only when **more than one** instalment remains, so a single remaining instalment is never previewed. |
+| `has_eligible_epd` | Early payment discount applies | boolean | Stored. Set by the document's default values when the instalment state is the early-discount one. |
+| `discount_date` | Discount deadline | date | Stored. Set together with the previous flag. |
+| `epd_info` | Early Payment Discount Information | text | Computed, not stored, recomputed when the amount changes. See below. |
+
+### 14.2 Default values taken from the document
+
+Opening the wizard on a customer document fills it from the next-payment computation of
+[`calculations.md`](calculations.md) section 10.2:
+
+| Wizard field | Value |
+| --- | --- |
+| currency | the document currency |
+| partner | the document's partner |
+| amount | the next amount to pay |
+| maximum amount | the amount due, **except** in the early-discount state where it is the next amount to pay, so that the discounted amount is also the ceiling |
+| open instalments | one entry per unreconciled instalment, but only when the instalment state is "next" or "overdue"; empty in every other state |
+| early payment discount applies, discount deadline | set only in the early-discount state |
+
+### 14.3 The texts it emits
+
+| Text | Condition | Emitted text |
+| --- | --- | --- |
+| Warning: nothing to pay | the maximum amount is not greater than zero | "There is nothing to be paid." |
+| Warning: non-positive amount | the amount is not greater than zero | "Please set a positive amount." |
+| Warning: amount too large | the amount exceeds the maximum amount | "Please set an amount lower than " followed by the maximum amount formatted in the wizard currency, then a full stop |
+| Warning: portal payment switched off | no other warning applies **and** the system parameter that enables portal payment is off | "Online payment option is not enabled in Configuration." |
+| Instalment preview row | one per instalment, only when more than one remains | a number sign, the instalment position, " - Installment of ", the amount formatted in the wizard currency in bold, " due on ", and the formatted maturity date in bold and in the accent colour |
+| Early payment discount notice | the early-discount flag is on **and** the chosen amount equals the amount due | "A discount will be applied if the customer pays before " followed by the formatted discount deadline, then " included." |
+
+Only one warning is shown: the first of the first three whose condition holds, and the fourth only
+when none of the first three applies. The instalment preview and the early payment discount notice
+are independent of the warnings and of each other.
+
+### 14.4 The portal payment address
+
+For a customer document the generic address is replaced entirely:
+
+1. **The address** is the site's base address for that document, followed by the document's own
+   portal address. The document's portal address is the path `/my/invoices/` and the document
+   identifier, followed by a question mark and the query parameter `access_token` carrying the
+   document's sharing token, which is created on demand if the document has none yet. Because that
+   portal address itself begins with a separating slash, the concatenation produces two consecutive
+   slashes after the base address; browsers and the routing treat them as one.
+2. **The query parameters**, in this order: `move_id` carrying the document identifier, `amount`
+   carrying the chosen amount, `payment_token` carrying the signed token of point 4, and `payment`
+   carrying the value true.
+3. They are appended after a question mark when the address carries no query string yet, and after an
+   ampersand when it does. For a customer document the sharing token has already opened a query
+   string, so in practice they are always appended after an ampersand.
+4. **The signed token** is generated over the pair (document identifier, chosen amount) only — not
+   over the currency, the partner or the company, which is what the generic wizard signs. This is
+   what makes the portal able to detect a tampered amount: the portal recomputes the token from the
+   identifier in the address and the amount in the address, and a mismatch sends the visitor back to
+   the portal home. It also means that a token remains valid for the same document and the same
+   amount however the other parameters change.
+5. **The anchor** `#portal_pay` is appended last, so the browser lands directly on the payment block
+   of the document page.
+
+Worked example: document identifier 4271, chosen amount 1 250.00, sharing token *T*. The address is
+the base address, then `/my/invoices/4271`, then `?access_token=` and *T*, then `&move_id=4271`, then
+`&amount=1250.0`, then `&payment_token=` followed by the signature of the pair (4271, 1250.0), then
+`&payment=True`, then `#portal_pay`.
+
+---
+
+## 15. Relations with other domains
+
+Every relation this domain has with a sibling folder, with the direction of dependence, the field
+that carries it, and the event that crosses the boundary.
+
+| Sibling domain | Direction of dependence | Field that carries the relation | Event that crosses the boundary |
+| --- | --- | --- | --- |
+| [`../general-ledger/`](../general-ledger/README.md) | this domain depends on it | `journal_id` on the document, `account_id` on the line | Posting a customer document writes its journal items into the ledger and submits them to the lock dates, the hash chain and the audit trail. |
+| [`../taxes/`](../taxes/README.md) | this domain depends on it | `tax_ids` and `tax_repartition_line_id` on the line | Every write on a draft document asks the tax engine to recompute the tax lines and the tax grids. |
+| [`../multi-currency/`](../multi-currency/README.md) | this domain depends on it | `currency_id` and `invoice_currency_rate` on the document | Reconciling a foreign-currency receivable line makes that domain create the exchange difference entry. |
+| [`../analytic-accounting/`](../analytic-accounting/README.md) | this domain depends on it | `analytic_distribution` on the line | Posting creates the analytic lines from the distributions carried by the product lines and the discount allocation lines. |
+| [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/README.md) | mutual | `matched_payment_ids` on the document; `payment_date`, `discount_date`, `discount_amount_currency` and `discount_balance` on the line | Reconciling a payment against a receivable line recomputes this document's payment status; the payment side reads the early-payment-discount triple and the next payment date, both defined in section 2.3 of this file, to decide the discounted amount and the write-off. |
+| [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/README.md) | that domain depends on this one | the payment method line's `payment_provider_id` | The payment journal chosen on a provider (section 13) creates, retargets or deletes that provider's payment method line. |
+| [`../payment-providers/`](../payment-providers/README.md) | mutual | `transaction_ids` on the document, `journal_id` on the provider | A transaction reaching the done state posts the document if it is still draft, creates the payment and reconciles it (see [`state-machines.md`](state-machines.md) section 1.3 and [`accounting-effects.md`](accounting-effects.md) section 6.5). Conversely the provider names the bank journal, and that journal's payment method line names the provider back — the dependence runs both ways and the two records are kept in step by the rule of section 13.2. |
+| [`../electronic-invoicing-and-document-exchange/`](../electronic-invoicing-and-document-exchange/README.md) | that domain depends on this one | `invoice_edi_format` on the contact and on the send wizard, `extra_edis` on the send wizard | Sending a document offers the extra electronic deliveries that domain declares and hands it the source document to build the structured file from. |
+| [`../accounts-payable/`](../accounts-payable/README.md) | shared entity | `move_type` on the document | The same entity carries vendor bills; the contact-card statistics entry of section 6.1 adds the two counts together, so the figure is a joint one. |
+| [`../sales/`](../sales/README.md) | that domain depends on this one | `payment_state` on the document, `credit_to_invoice` on the contact | Posting or settling a customer document changes what the order shows as invoiced and paid. |
+| [`../messaging-and-activities/`](../messaging-and-activities/README.md) | this domain depends on it | `template_id` and `mail_partner_ids` on the send wizard | Sending posts a message on the document thread; the subscription subtypes of [`interfaces.md`](interfaces.md) section 7.4 decide who is notified. |
+| [`../customer-portal/`](../customer-portal/README.md) and [`../website-and-storefront/`](../website-and-storefront/README.md) | that domain depends on this one | the document's access token | The customer opens, downloads and pays the document from the portal pages. |
+| [`../contacts-and-organizations/`](../contacts-and-organizations/README.md) | this domain depends on it | `partner_id` and `commercial_partner_id` on the document | Deleting a contact is refused once any journal entry names it; see [`business-rules.md`](business-rules.md) section 6.2. |
+| [`../products-and-catalog/`](../products-and-catalog/README.md) and [`../units-of-measure-and-packaging/`](../units-of-measure-and-packaging/README.md) | this domain depends on them | `product_id` and `product_uom_id` on the line | Choosing a product defaults the description, the unit, the price, the taxes and the income account. |
+| [`../fiscal-localizations/`](../fiscal-localizations/README.md) | that domain depends on this one | `country_code` on the document and on both wizards | A country capability adds its own fields to the document and to the reversal and debit-note dialogues, keyed on that country code. |

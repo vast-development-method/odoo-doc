@@ -15,7 +15,7 @@ A connector is a set of behaviours attached to one provider code. Every connecto
 | Behaviour | Generic answer | Purpose |
 |---|---|---|
 | Feature support | tokenization false, manual capture unsupported, express checkout false, refund `none` | Declares what the connector can do. |
-| Supported currencies | every currency, archived ones included | Narrows `available_currencies`. |
+| Supported currencies | every currency, archived ones included | Narrows `available_currency_ids`. |
 | Default payment method codes | the empty set | The methods activated when the provider is put in service. |
 | Build the request web address | the empty text | Turns an endpoint name into a full address, choosing between the production and the test service. |
 | Build the request headers | no headers | Authentication, content type, idempotency key, signature. |
@@ -23,7 +23,7 @@ A connector is a set of behaviours attached to one provider code. Every connecto
 | Parse the response content | the structured data body of the answer | For providers that wrap their answer or use another format. |
 | Parse the response error | the raw text of the answer | Extracts the human-readable message put into `The payment provider rejected the request.` |
 | Should build the inline form | true | Whether the payment happens without leaving the platform. |
-| Redirect form template | the provider's `redirect_form_view` | May differ for a validation operation. |
+| Redirect form template | the provider's `redirect_form_view_id` | May differ for a validation operation. |
 | Validation amount | 0 | The amount charged to prove a payment method works. |
 | Reset values | none | The credential fields cleared by the Reset credentials operation. |
 | Removal values | code `none`, state `disabled`, unpublished, the four templates emptied | Applied when the package is uninstalled. |
@@ -541,7 +541,7 @@ communication = the payment reference of the first linked invoice, when there is
 - When a wire transfer provider is created, its pending message is emptied, in order that the bank account details can be filled in.
 - The Recompute pending message operation rebuilds it as a rich-text block with the heading `Please use the following transfer details`, the sub-heading `Bank Account` or `Bank Accounts`, and a bullet list of the display names of the bank accounts of every bank journal of the company. It only runs when the Accounting Payments package is installed.
 - A separate internal step fills that message for every wire transfer provider that still has none.
-- The switch `quick_response_code` offers the customer a machine-readable payment code; the payload is built by [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md).
+- The switch `qr_code` offers the customer a machine-readable payment code; the payload is built by [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md).
 - The provider search domain is extended with the custom mode, in order that the setup and removal steps of the three custom packages do not collide.
 - The removal values additionally empty `custom_mode`.
 - No accounting payment method and no outstanding account are created for the code `custom`.
