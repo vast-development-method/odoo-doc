@@ -228,6 +228,8 @@ Both show the message identifier, the response code, the delivery state and the 
 
 Adds the electronic address scheme, presented as a filtered selection restricted to the schemes available to that contact, and the participant endpoint, both inside the invoice sending settings group. Editing either one, or the structured format, triggers the participant lookup immediately.
 
+When the delivery location code package is installed, the form also carries the delivery location code, in the miscellaneous group of the sales and purchases page and in the embedded form of a child address, hidden in both places unless the address type of the contact is the delivery type. It is a plain text input with no check on its content.
+
 ## 8.11 Tax form
 
 Adds the tax category code and, only when the chosen category demands one, the tax exemption reason code, both after the country of the tax.

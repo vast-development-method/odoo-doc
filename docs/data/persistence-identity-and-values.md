@@ -1031,7 +1031,7 @@ Each criterion is independently verifiable against a replacement.
 **Identifiers**
 
 1. Given an entity with records, when a record is created and the transaction is rolled back, and another record is created afterwards, then the second record's identifier is strictly greater than the first's, and the first number is never reused.
-2. Given a create whose value map contains `identifier`, `create_date`, `create_uid`, `write_date`, `write_uid` or `parent_path`, when the record is created, then those values are ignored and the store's own values are written.
+2. Given a create whose value map contains `id`, `create_date`, `create_uid`, `write_date`, `write_uid` or `parent_path`, when the record is created, then those values are ignored and the store's own values are written.
 
 **External identifiers**
 

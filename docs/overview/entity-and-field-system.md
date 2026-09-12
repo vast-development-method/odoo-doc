@@ -78,17 +78,44 @@ A persistent entity may instead be backed by a **stored query**: the entity decl
 
 A transient entity is stored exactly like a persistent one — it has a real table and real rows — but its rows are expected to be short-lived and are removed by the housekeeping job. It is the mechanism behind every multi-step dialog: the dialog's state is a record, so the whole machinery of fields, defaults, on-change, computation and validation works inside a dialog with no special case.
 
-**Housekeeping rules.** The job runs periodically; per entity, cleaning actually happens at most once every five minutes.
+**Housekeeping rules.** The job runs periodically; per entity, cleaning actually happens at most once every five minutes. A transient entity must keep the audit fields of [section 4](#4-the-automatic-fields) switched on, because the housekeeping job decides what to remove by reading the last-update stamp of each row; a transient entity that switched them off could not be cleaned and its declaration is rejected.
+
+Two limits apply, independently of each other, and both are declared per entity with an installation-wide default:
 
 | Setting | Default | Meaning |
 |---|---|---|
-| Maximum record count | Configured per installation | When the row count exceeds it, rows older than five minutes are removed. Zero means unlimited. |
-| Maximum idle lifetime, in hours | Configured per installation | Rows whose last modification is older than this are removed. Zero means unlimited. |
+| Maximum record count | The installation-wide setting for the maximum number of transient rows | The number of rows tolerated in the table. Zero means unlimited. |
+| Maximum idle lifetime, in hours | The installation-wide setting for the transient age limit | The idle lifetime a row may reach. Zero means unlimited. |
 
-Two rules are absolute:
+**The cleaning procedure for one transient entity.**
 
-1. **A row modified within the last five minutes is never removed**, whatever the settings say. A user filling in a dialog must not have it deleted underneath them. The age threshold used for a count-based clean is therefore raised to five minutes if it would be lower.
-2. Each cleaning pass removes at most a bounded number of rows and reports whether more remain, so that one pass cannot lock the table for long.
+1. **Age-based pass.** If the maximum idle lifetime is not zero, delete every row whose last-update stamp is strictly older than the age threshold, subject to the floor of step 3:
+
+```formula
+age threshold (point in time) = current time (point in time) − maximum idle lifetime (hours) × 3600 seconds per hour
+```
+
+2. **Count-based pass.** If the maximum record count is not zero, count the rows of the table. If the count is **strictly greater** than the maximum record count, delete every row whose last-update stamp is strictly older than the count threshold, subject to the same floor:
+
+```formula
+count threshold (point in time) = current time (point in time) − 300 seconds
+```
+
+3. **The five-minute floor.** Neither threshold is ever placed less than 300 seconds before the current time. A row updated within the last five minutes is never removed, whatever the two settings say, because a user is probably still filling the dialog in. When the maximum idle lifetime is smaller than 300 seconds the floor replaces it.
+4. **The per-pass cap.** One pass deletes at most **100,000 rows**. The pass returns the transport name of the entity it cleaned and a flag saying whether rows remain to be examined, so that the caller can schedule a further pass rather than hold a long transaction over a large table.
+
+Note that the count-based pass does not stop at exactly the maximum record count: it removes **everything** above the five-minute floor. Stopping at the limit would leave the table permanently at its limit, so that the very next insertion would trip it again.
+
+**Worked example.** The entity declares a maximum idle lifetime of 0.2 hours (twelve minutes) and a maximum record count of 20. The table holds 55 rows: 10 updated within the last 5 minutes, 12 updated between 5 and 10 minutes ago, and 33 updated more than 12 minutes ago.
+
+```formula
+age threshold = current time − 0.2 hours × 3600 seconds per hour = current time − 720 seconds
+```
+
+- Step 1 deletes the 33 rows older than 720 seconds. 55 − 33 = 22 rows remain.
+- Step 2 counts 22 rows. 22 > 20, so the count-based pass runs with a threshold of the current time − 300 seconds, and deletes the 12 rows in the five-to-ten-minute band. 22 − 12 = 10 rows remain.
+- The 10 rows younger than 300 seconds survive, even though 10 is below the limit of 20 only by accident: the floor, not the limit, is what stopped the deletion.
+- Both passes together deleted 45 rows, far below the per-pass cap of 100,000, so the pass reports that nothing remains to be examined.
 
 **Relations to and from transient entities.**
 
@@ -206,6 +233,15 @@ Every field, whatever its type, accepts the attributes below.
 | Copy | true; **false** for to-many fields, computed fields, related fields, company-dependent fields, and any field named `state` | Whether duplication carries the value over. See [section 19](#19-copying). |
 | Default export inclusion | false | Whether a re-importable export includes the field by default. |
 | Exportable | true | Whether the field may appear in an export at all. |
+| Write order | 0 for most types; **10** for monetary fields and for the custom-property value field; **20** for one-to-many and many-to-many fields | The rank that decides in which order the fields of one write operation are applied. Fields are applied in ascending rank; fields of equal rank keep the order in which the entity declared them. |
+
+**Why the write order has exactly those three values.** A single write may name fields of every type, and three groups must not be applied at an arbitrary point:
+
+1. **Rank 0 — everything else.** Plain columns can be applied in any order among themselves, so they go first and are available to whatever follows.
+2. **Rank 10 — monetary amounts and the custom-property value field.** A monetary amount is rounded to the precision of *its* currency ([section 6.5](#65-monetary-amount)), and the currency may itself be one of the fields being written. Applying the amount after every rank-0 field guarantees that the currency in force is the one the same write set, not the one the record had before. The custom-property value field shares the rank because the properties it applies are resolved through the container link, which is a rank-0 field of the same write.
+3. **Rank 20 — the to-many fields.** A to-many write can delete linked records ([section 7.5](#75-writing-to-a-to-many-field)), and deleting a record forces the unit of work to flush its pending changes to the database. Applying to-many commands last means that flush happens after every scalar field of the same write has already been applied, so the deletion sees a consistent record rather than a half-written one.
+
+A rebuild that applies the fields of a write in declaration order instead of this rank order produces different rounding on monetary amounts and can lose scalar changes made in the same call as a line deletion.
 
 ### 5.3 Behaviour attributes
 
@@ -253,10 +289,13 @@ Marking a field required does two distinct things:
 
 The second only succeeds if no existing row violates it. The synchronisation therefore proceeds as follows:
 
-1. Add the column if missing, with the field's default written into every existing row.
-2. Attempt to add the not-null constraint.
-3. If it fails, record a warning naming the entity and the field, leave the constraint off, and continue. The field remains required at the client level but is not enforced by the database.
-4. At the end of the build, verify agreement: for every field the registry believes is not null, confirm that the column really is. The registry's record of which fields are truly not-null is what the filter compiler consults in order to decide whether a condition needs to consider empty values ([record operations and query notation, section 4.6](record-operations-and-query-notation.md#46-empty-values-and-the-three-valued-logic)).
+1. Add the column if missing, and initialise the existing rows: a row whose value is empty receives the field's default, evaluated **once** for the whole table rather than per row. When the field is computed or related, the rows are **not** filled with the default; they are scheduled for recomputation instead, and the computation supplies the values ([section 9](#9-the-recomputation-algorithm)).
+2. Flush the pending writes for the field, so that values assigned earlier in the same build are in the column before the constraint is judged.
+3. Attempt to add the not-null constraint, as the **last** step of the schema update for that table.
+4. If it fails, record a warning naming the entity and the field, leave the constraint off, and continue. The field remains required at the client level but is not enforced by the database.
+5. At the end of the build, verify agreement: for every field the registry believes is not null, confirm that the column really is. The registry's record of which fields are truly not-null is what the filter compiler consults in order to decide whether a condition needs to consider empty values ([record operations and query notation, section 4.6](record-operations-and-query-notation.md#46-empty-values-and-the-three-valued-logic)).
+
+**Removing the required flag** takes effect at once: the not-null constraint is dropped during the next schema synchronisation, without any inspection of the rows, because relaxing a constraint can never fail.
 
 A required field on a **company-dependent** field is contradictory and records a warning: the per-company mapping cannot be non-empty for a company that has no value.
 
@@ -461,13 +500,26 @@ Stores rich content as markup.
 | Sanitise | true | Whether the value is cleaned on write. |
 | Sanitise tags | true | Remove disallowed elements. |
 | Sanitise attributes | true | Remove disallowed attributes. |
-| Sanitise style | false | Remove inline style declarations. |
+| Sanitise style | false | Clean inline style declarations rather than keeping them as they are. |
 | Sanitise form | true | Remove form elements. |
-| Strip style | false | Remove the style attribute entirely. |
+| Sanitise conditional comments | true | Remove conditional comments outright. When false, a conditional comment is kept and its content is cleaned like any other content. |
+| Sanitise output method | markup | How the cleaned tree is serialised back to text: with markup rules (elements that carry no content are written in their short form, entities are left as they are) or with strict tree rules (every element is closed explicitly). |
+| Strip style | false | Remove the style attribute entirely, so that it is never cleaned. Takes precedence over sanitise style. |
 | Strip classes | false | Remove class attributes. |
-| Translatable | false, or term-by-term | A markup field may be translated as a whole value or term by term, which translates the text nodes while keeping the markup shared. |
+| Sanitise overridable | false | Whether a member of the bypass-sanitising group may store content the cleaner would otherwise reject. See below. |
+| Translatable | false, or term-by-term | A markup field may be translated as a whole value or term by term, which translates the text nodes while keeping the markup shared. Declaring a field both translatable and sanitised forces the term-by-term mode ([section 12](#12-translatable-values)). |
+
+**The outgoing-mail preset.** Declaring the sanitise attribute as the outgoing-mail preset rather than as a boolean is a convenience that expands to five settings at once: sanitise on, sanitise tags **off**, sanitise attributes **off**, sanitise conditional comments **off**, and the output method set to strict tree rules. It exists for content that a foreign electronic-mail client will render, where the client's own restrictions are the real defence and where removing conditional comments would break the layouts those clients rely on.
 
 Sanitisation is applied on assignment, so the stored value is already clean. A field that must accept arbitrary markup — a rendering template, for instance — switches sanitisation off, and the capability that owns it is then responsible for controlling who may write it.
+
+**Overridable sanitising.** When the sanitise-overridable attribute is on and the acting user is **not** a member of the bypass-sanitising group, a write does not simply clean the incoming value. The value already stored is read first and examined in two forms: the stored value cleaned by the sanitiser, and the stored value merely normalised (parsed and serialised again without cleaning). If cleaning the stored value would empty it, or if the cleaned form differs from the normalised form, then the stored value contains content that only a privileged user could have put there, and the write is refused with:
+
+> "The field value you're saving (`<entity>` `<field>`) includes content that is restricted for security reasons. It is possible that someone with higher privileges previously modified it, and you are therefore not able to modify it yourself while preserving the content."
+
+where `<entity>` is the human-readable description of the entity and `<field>` is the label of the field. A report of the difference between the cleaned and the normalised form is written to the diagnostic log at informational level, so that an administrator can see what the ordinary user was not allowed to touch. A member of the bypass-sanitising group writes the value unchanged, with no comparison.
+
+Values read from a markup field are markup-safe: a caller that concatenates one with plain text must escape the plain text itself, because the markup field will not be escaped again on rendering.
 
 ### 6.9 Date
 
@@ -540,16 +592,40 @@ Stores bytes.
 
 | Attribute | Default | Meaning |
 |---|---|---|
-| Stored as an attachment | true | When true the bytes live in an attachment record, and the entity's column holds nothing. When false the bytes are stored inline in the column, encoded. |
-| Maximum width, maximum height | none | For the image specialisation: the dimensions the value is resized to on write. |
-| Verify resolution | true | For the image specialisation: whether an oversized image is rejected rather than resized. |
+| Stored as an attachment | true | When true the bytes live in an attachment record, and the entity's column holds nothing. When false the bytes are stored inline in the column, encoded. A binary field declared not stored is forced to not-attachment as well, since there is nothing to attach. |
+| Maximum width | none (no limit) | For the image specialisation: the greatest stored width, in pixels. |
+| Maximum height | none (no limit) | For the image specialisation: the greatest stored height, in pixels. |
+| Verify resolution | true | For the image specialisation: whether the total pixel count of the decoded image is checked against the platform maximum. |
 
 Rules:
 
-1. With attachment storage, writing a value creates or replaces an attachment record whose owner is this record and this field, and whose content is deduplicated by digest in the file store. Reading yields the bytes.
-2. Reading a binary field with the size-instead-of-content context key set yields a human-readable size instead of the bytes, so that a list screen can show "3.20 kB" without transferring the content.
-3. The **image** specialisation additionally resizes on write to fit within the declared maximum dimensions, preserving the aspect ratio, and exposes derived fields at fixed sizes (for example a 1024-pixel, a 512-pixel, a 256-pixel and a 128-pixel variant) that are computed from the original.
-4. Binary fields are never prefetched, because transferring content for records nobody asked about is expensive.
+1. With attachment storage, writing a value creates or replaces an attachment record whose owner is this record and this field, and whose content is deduplicated by digest in the file store. The attachment row records the field name as its name, the transport name of this entity as the referenced entity, the field name as the referenced field, the identifier of this record as the referenced identifier, and the value as its content. Reading yields the bytes. Writing an empty value deletes the attachment rows; records that had no row get one created; records that had one get it updated.
+2. Reading attachment-backed values issues **one** search over the attachment catalogue with elevated rights, restricted to this entity, this field and the identifiers being read, and takes either the content or the recorded byte length depending on rule 3.
+3. Reading a binary field with the size-instead-of-content context key set — either the general key or the field-specific variant naming this field — yields a human-readable size instead of the bytes, so that a list screen can show "3.20 kB" without transferring the content. The field declares that key as a context dependency, so the cache holds one entry per value of the key. A write always switches the context back to full content, because a size string is not a value that can be stored.
+4. Values are exchanged as text in the base-64 alphabet. A byte value is accepted as it stands. A text value that is neither valid base-64 nor plain seven-bit text is refused with **"ASCII characters are required for "** the value **" in "** the field name.
+5. **The vector-image guard.** When the first character of the value is `P` or `<` — the base-64 opening and the plain-text opening of a markup document — the value is decoded and its content type is detected. If the content type is a scalable vector image and the acting user is not a member of the settings group, the write is refused with **"Only admins can upload SVG files."** A vector image is executable content in a way that a raster image is not, which is why it is restricted to administrators rather than sanitised.
+6. Binary fields are never prefetched, because transferring content for records nobody asked about is expensive.
+7. **Filtering** an attachment-backed binary field supports existence only. The condition "field is empty" compiles to "no attachment row exists for this record and field" and "field is not empty" to "an attachment row exists". Any other operator is refused: the attempt is recorded in the diagnostic log and the condition is replaced by the constant true, so the search returns everything rather than failing. A pattern operator is refused outright with **"Cannot use like operators with binary fields"**.
+8. Export renders nothing readable for a binary value and is normally suppressed on such fields.
+
+**The image specialisation.** An image is a binary with the three extra attributes above and a processing step applied on create and on write:
+
+1. If the field is read-only **and** either declares no size limit or follows a path to another image field carrying the same limits, the value is stored exactly as received, with no decoding.
+2. The value is decoded from base-64. A value that is not valid base-64 is refused with **"Image is not encoded in base64."**
+3. If the decoded content is already in an efficient web image format: with no size limit declared it is stored unchanged; otherwise the platform first looks for an already-resized variant among the attachments of the file store, matching on the content checksum of the original together with a description of the form `resize: <largest limit>`, where `<largest limit>` is the larger of the declared maximum width and maximum height in pixels. A matching variant is stored instead of the original; when none is found the original is stored.
+4. Otherwise the image is resized to fit inside the declared maximum width and maximum height, preserving the aspect ratio, the resolution is verified when the verify-resolution attribute is on, and the result is encoded back to base-64.
+5. **The resolution ceiling.** When the resolution is verified, an image whose width in pixels multiplied by its height in pixels exceeds **50,000,000 pixels** is refused rather than resized. The ceiling is a defence against a small compressed file that expands to an image large enough to exhaust memory, so it is applied to the decoded dimensions before any resizing work is done.
+
+```formula
+total resolution (pixels) = decoded width (pixels) × decoded height (pixels)
+```
+
+  A 9,000 × 6,000 photograph is 54,000,000 pixels and is refused; an 8,000 × 6,000 photograph is 48,000,000 pixels and is accepted and then resized to the declared limits.
+
+6. When the field follows a path to another field, the **unprocessed** value is kept in the cache while the write-back to the target field runs, and the cache is corrected with the resized value once the write-back has finished. This is what lets the target field store the full-size image while this field stores the reduced one.
+7. When an image assigned to an in-memory record fails processing, the assignment is **silently skipped** rather than refused, because a client that read the field with the size-instead-of-content key set will send the size string back, and refusing would make an ordinary round trip fail.
+8. An image field requires its entity to keep the audit fields of [section 4](#4-the-automatic-fields), because the resized variants are cached against the last-update stamp of the record; a definition that breaks this rule is reported as invalid at registry build time.
+9. The image specialisation exposes derived fields at fixed sizes (for example a 1024-pixel, a 512-pixel, a 256-pixel and a 128-pixel variant) computed from the original, so that a client asks for the size it needs instead of the full image.
 
 ### 6.15 Structured document
 
@@ -566,7 +642,7 @@ Rules:
 
 Two paired types let a user add fields to records of an entity without changing the schema.
 
-**The definition field** holds the list of user-defined field definitions: for each, a name, a label, a type, and type-specific attributes such as the selection values, the target entity of a relation, or the tag list with colours. It lives on a *container* record — a project, a sales team, a category — so that all records belonging to that container share the same set of user-defined fields.
+**The definition field** holds the ordered list of user-defined field definitions, stored as a structured document. It lives on a *container* record — a project, a sales team, a category — so that all records belonging to that container share the same set of user-defined fields.
 
 **The value field** holds the values for one record, as a mapping from definition name to value. It declares which field of the record points at the container and which field of the container holds the definitions.
 
@@ -575,13 +651,79 @@ Two paired types let a user add fields to records of an entity without changing 
 | Definition record | The name of the many-to-one on this entity that leads to the container. |
 | Definition record field | The name of the field on the container that holds the definitions. |
 
+#### The grammar of one definition
+
+Each entry of the definition list is a mapping. Exactly twelve keys are allowed, and a capability package may register further allowed keys of its own for the properties it introduces.
+
+| Key | Required | Restricted to | Meaning |
+|---|---|---|---|
+| `name` | yes | — | The stable identifier of the property, used as the key of the value mapping. Between 1 and 512 characters, made only of lowercase letters, digits and underscores. |
+| `type` | yes | — | The data type, one of the fourteen discriminators below. |
+| `string` | no | — | The label shown to the user. |
+| `default` | no | — | The value applied to a child record when it is attached to this container and leaves the property unset. |
+| `comodel` | no | link to one record, link to several records | The transport name of the target entity. |
+| `domain` | no | link to one record, link to several records | A filter restricting the candidate records, stored as text. |
+| `selection` | no | closed list | The ordered list of value-and-label pairs. |
+| `tags` | no | multi-valued label list | The ordered list of value, label and colour-index triples. |
+| `currency_field` | no | monetary amount | The name of the property that holds the currency of this amount. |
+| `suffix` | no | — | A unit shown after the value. |
+| `view_in_cards` | no | — | Whether the property is shown on compact card screens. |
+| `fold_by_default` | no | — | Whether a grouping on this property is collapsed by default. |
+
+The fourteen stored type discriminators, with the meaning of each:
+
+| Stored value | Meaning |
+|---|---|
+| `boolean` | True or false. |
+| `integer` | A whole number. |
+| `float` | A decimal number. |
+| `char` | Single-line text. |
+| `text` | Long text. |
+| `html` | Rich text carrying markup. |
+| `date` | A calendar date. |
+| `datetime` | A date and time. |
+| `monetary` | An amount in the currency named by the `currency_field` key. |
+| `many2one` | A link to one record of the entity named by the `comodel` key. |
+| `many2many` | A link to several records of the entity named by the `comodel` key. |
+| `selection` | One value of the closed list given by the `selection` key. |
+| `tags` | Any number of values of the label list given by the `tags` key. |
+| `separator` | A visual separator that carries no value at all; it exists to group the properties that follow it. |
+
+#### Validation of a definition list
+
+A definition list is validated whenever it is written. Each check states its refusal:
+
+1. A key that is not one of the allowed keys, in a definition, is refused with **"Some key are not allowed for a properties definition ["** the offending keys, separated by a comma and a space, **"]."**
+2. A definition that omits `name` or `type` is refused with **"Some key are missing for a properties definition ["** the missing keys, separated by a comma and a space, **"]."**
+3. A key that belongs to another type than the declared one — a `selection` key on a text property, a `currency_field` key on a date property — is refused with **"Invalid property parameter '"** the key **"'"**. The restriction column of the table above lists which key belongs to which type.
+4. A name that is empty, longer than 512 characters, or made of anything but lowercase letters, digits and underscores, is refused with **"Wrong property field value name '"** the name **"'."**
+5. A name that is empty or repeats a name already used in the same list is refused with **"The property name '"** the name **"' is not set or duplicated."**
+6. A rich-text property whose name does not end with the marker `_html` is refused with **"HTML property name should end with `_html`."**, and a property of any other type whose name does end with that marker is refused with **"Only HTML properties can have the `_html` suffix."**
+7. A type that is not one of the fourteen discriminators is refused with **"Wrong property type '"** the value **"'."**
+8. A `comodel` key naming an entity that does not exist, or that is transient or abstract, is refused with **"Invalid model name '"** the value **"'"**.
+
+#### Reading a definition back
+
+The definition stored on the container may have aged: a package that declared the target entity may have been removed, a field named in a filter may have gone. Reading the definition therefore degrades rather than fails:
+
+1. A definition that does not carry a non-empty value for both required keys is **skipped**: it is not returned at all.
+2. A link property whose target entity no longer exists has its `comodel` key set to false and its `domain` key removed, so that the client shows the property as unconfigured rather than raising.
+3. A link property whose filter no longer parses or no longer validates against the target entity — because a field it names has gone — has its `domain` key removed and keeps its target.
+4. A closed-list property or a label-list property with no options at all reports an empty option list rather than no key, so that a client never has to distinguish "no options" from "not a list property".
+
+#### The value field in detail
+
+The value field is always stored, always editable, never copied when a record is duplicated, never prefetched, carries write order 10 ([section 5.2](#52-storage-attributes)) and is precomputed. It is declared with a two-part path naming the many-to-one that leads to the container and the definition field on the container, and it is automatically a computed field depending on that many-to-one, which is what makes a change of container re-resolve the properties.
+
 Rules:
 
-1. Reading the value field returns, for each defined property, its definition merged with the record's value, so that a client can render it without a second call.
-2. Writing accepts either the full list with values or a mapping of name to value.
-3. Changing the container of a record re-resolves which properties apply; values whose property no longer exists are dropped by a cleaning pass that runs after every write that could have changed the definitions.
-4. Properties can be filtered and grouped: a condition names the value field, a full stop and the property name. Grouping by a property of relational or selection type expands to the defined values.
-5. Properties are not columns. No index exists for them beyond what the structured-document column offers, so filtering on a property is slower than filtering on a field.
+1. Reading the value field returns, for each defined property, its definition merged with the record's value under an added value key, so that a client can render it without a second call. A link value additionally carries the display name of the records it points at.
+2. Writing accepts either the stored mapping of name to value or the merged list form. The merged list form additionally rewrites the container's definition when an entry carries the definition-changed marker, which is how a user adds a property from the record rather than from the container.
+3. **Defaults on attachment.** When a record is attached to a container, every property of the container's definition whose value on the record is unset takes a default, in this order: the context key `default_<value field>.<property name>` when the context carries it, otherwise the `default` key of the definition when that key is non-empty, otherwise nothing.
+4. Changing the container of a record re-resolves which properties apply; values whose property no longer exists are dropped by a cleaning pass that runs after every write, load or import that could have changed the definitions.
+5. Properties can be filtered and grouped: a condition names the value field, a full stop and the property name. Grouping by a property of relational or closed-list type expands to the defined values.
+6. Properties are not columns. No index exists for them beyond what the structured-document column offers, so filtering on a property is slower than filtering on a field.
+7. **Rich-text properties are cleaned** on write with a fixed set of sanitising settings, which the container's declaration cannot change: tag cleaning on, attribute cleaning on, form removal on, conditional-comment removal on, style cleaning off, style stripping off, class stripping off ([section 6.8](#68-markup) explains each). The same cleaning is applied to the `default` key of a rich-text property when the definition is written.
 
 ---
 
@@ -694,6 +836,31 @@ Rules:
 3. Commands are the only way to modify a to-many over the transport, because a bare list of identifiers could not express "create these and keep those".
 4. When the acting environment is elevated, commands targeting an entity that forbids privileged relational commands are refused. This prevents a privileged operation from being made to write, say, a group membership through a relation it was not meant to touch.
 5. Applying Update or Delete through a to-many performs the corresponding access check on the target records, even when the command arrives as a default value.
+6. Three shorthands are accepted in place of a command list, and each expands to exactly one command: a record set of the target entity expands to a Set over its identifiers; a plain list of identifiers expands to a Set over those identifiers; an empty value expands to a Clear.
+
+#### Execution order for a one-to-many
+
+The commands of one list are not simply executed one after another: some take effect at once and some accumulate, because a one-to-many is written through the inverse many-to-one on the target entity and the platform issues as few statements as it can. The list is walked once in order, and each command is handled as follows:
+
+1. **Update** is executed immediately: the values are written on the named target record.
+2. **Delete** appends the named record to an accumulated **delete list**.
+3. **Unlink** depends on the deletion policy of the inverse many-to-one. When that policy is *cascade*, the record is appended to the delete list, because emptying the inverse would delete it anyway. Otherwise the inverse field of the named record is emptied **immediately**, and the record survives with no owner.
+4. **Create** appends its values to an accumulated **create list**, each entry carrying the inverse many-to-one already set to the owning record, so that the new record is linked by construction rather than by a second write.
+5. **Link** appends the named record to an accumulated **link list**, attached to the **last** record of the written set. Linking one target to several owners is impossible for a one-to-many — the target has one inverse value — so when several records are being written at once the last one wins.
+6. **Clear** and **Set** first flush the accumulated delete, create and link lists, so that the state they act on is the real one; then they unlink every currently linked record that is not named in the command, and link the named records to the **last** record of the written set.
+7. **The creation-time safety rule.** While a record is being created, a Clear or a Set is not allowed to unlink records that already exist and point elsewhere: nothing has yet been created or linked in this write, so an unqualified unlink would silently steal or orphan other owners' lines. In that situation the command **degrades to a Link** of the named identifiers, and the unlink half is not performed.
+8. At the end of the walk the accumulated lists are flushed in one fixed order: **deletions first, then creations, then links**. Deleting before creating keeps a uniqueness constraint from firing between a line being removed and a line being added with the same key. Linking last means a record created earlier in the same list can be linked by a later command. Linking a record whose inverse value cannot be read fails the whole operation rather than half of it.
+
+#### Execution order for a many-to-many
+
+A many-to-many is written through an association table, which can be rewritten as a set difference, so the commands are replayed in memory before anything reaches the database:
+
+1. The current set of links is read for every record of the written set.
+2. The commands are replayed in order against an in-memory copy of that set: Link adds an identifier, Unlink removes one, Clear empties the set, Set replaces it wholesale, Update writes on the target immediately as for a one-to-many, Create schedules the creation of one target record shared by every owner and adds its identifier once it exists, and Delete schedules the deletion of the target record and removes its identifier from **both** the old set and the new one, so that no pair referencing it is written.
+3. When the execution does not carry elevated rights, the **read** permission of every **newly added** target record is checked — not of the targets that were already linked, which the owner could already see. A failure raises **"Failed to write field "** followed by the transport name of the entity, a full stop and the field name, then a line break and the access message that explains which record was refused.
+4. The pairs to add are inserted, ignoring a conflict with a pair that already exists, so that linking twice is harmless.
+5. The pairs to remove are deleted, grouped as a union of cartesian products — each group being a set of owners crossed with a set of targets — so that removing many links issues few statements rather than one per pair.
+6. Every target record whose link set changed is marked as modified on the **inverse** field, which schedules the recomputation of anything depending on it ([section 9](#9-the-recomputation-algorithm)). Without this step a total computed on the other side of the relation would keep a stale value.
 
 ### 7.6 Bypassing access on traversal
 
@@ -1432,6 +1599,22 @@ Rules:
 
 **Violation at run time.** A violation surfaces from the database at flush or at commit, not at assignment. The retry loop catches it, identifies the owning entity by matching the reported table name, translates it through that entity's constraint message catalogue, and raises a validation failure whose text is **"The operation cannot be completed: "** followed by the message. Constraint violations are never retried.
 
+**Generic failure messages.** The declared message of [rule 2](#153-database-constraints) is used when the failure names a constraint the entity declared and a message is recorded for it, either on the constraint catalogue record or by the constraint itself. When no declared message applies — an unnamed constraint, a constraint on another entity's table, a not-null column, a foreign key created by the field system — the platform composes a generic message from the database's own diagnosis. Two placeholders recur, and both are computed before the message is chosen:
+
+- **The entity display** is the human-readable description of the entity followed by its transport name in brackets, in the form `'<description>' (<transport name>)`. It is the literal word **"Unknown"** when the table the database reported is not this entity's table.
+- **The field display** is `'<label>' (<field name>)` when exactly one column is implicated and that column is a field of this entity; `'<column list>'` when several columns are implicated, the columns separated as a list in the reader's language; and the literal word **"Unknown"** when no column could be determined at all.
+
+| Failure reported by the database | Message |
+|---|---|
+| A not-null column received an empty value | **"Missing required value for the field "** the field display **"."** on the first line, **"Model: "** the entity display on the second, **"- create/update: a mandatory field is not set"** on the third, and **"- delete: another model requires the record being deleted, you can archive it instead"** on the fourth |
+| A foreign key still points at the row | **"Another model is using the record you are trying to delete."** then a blank line, then **"The troublemaker is: "** the entity display, then **"Thanks to the following constraint: "** the field display, then **"How about archiving the record instead?"**. When more than one column is implicated, the field display is replaced by the name of the constraint the database reported |
+| A unique constraint was violated | **"The value for "** the field display **" already exists."** then a blank line, then **"Detail: "** followed by the conflicting key and value exactly as the database reported them. Here the field display is composed differently: `'<column list>' (<label list>)`, the raw column names first and their labels after |
+| A check constraint was violated | No specific text can be composed, because a check constraint says nothing about which value is at fault; the database's own text is reported unchanged |
+
+Every one of these is wrapped by the caller in **"The operation cannot be completed: "** followed by the composed message, so that the outer form is the same whether the message was declared or generic.
+
+The two words **"Unknown"** and the four fixed lines of the not-null message are part of observable behaviour: support procedures key on the phrase "a mandatory field is not set" to tell a missing value from a blocked deletion, since the same database failure produces both.
+
 ### 15.4 Deletion guards
 
 A **deletion guard** is a rule declared to run before records are deleted. It may refuse.
@@ -2098,20 +2281,49 @@ Three indexes are created: a balanced tree on the product column; a balanced tre
 
 **AC-ENT-84.** *Given* a user-created many-to-many field, *when* its definition record is deleted, *then* its association table is dropped.
 
+**AC-ENT-85.** *Given* a transient entity declaring a maximum idle lifetime of 0.2 hours and a maximum record count of 20, and a table holding 55 rows of which 10 were updated within the last 300 seconds, 12 between 300 and 600 seconds ago and 33 more than 720 seconds ago, *when* one cleaning pass runs, *then* the age-based pass deletes the 33 rows, the count-based pass deletes the 12 rows because 22 exceeds 20, 10 rows survive, and the pass reports that nothing remains to be examined.
+
+**AC-ENT-86.** *Given* a transient entity declaring a maximum idle lifetime of 0.001 hours (3.6 seconds), *when* a cleaning pass runs, *then* the threshold used is the current time minus 300 seconds, because the floor replaces any smaller value, and no row updated within the last five minutes is deleted.
+
+**AC-ENT-87.** *Given* an image field with verified resolution, *when* a 9,000 × 6,000 image (54,000,000 pixels) is written, *then* the write is refused; *and given* an 8,000 × 6,000 image (48,000,000 pixels), *then* it is accepted and resized to the declared maximum width and height.
+
+**AC-ENT-88.** *Given* a binary field and a text value that is neither valid base-64 nor plain seven-bit text, *when* it is written, *then* the write fails with "ASCII characters are required for " the value " in " the field name.
+
+**AC-ENT-89.** *Given* a value whose first character is `P` and which decodes to a scalable vector image, *when* a user who is not a member of the settings group writes it to a binary field, *then* the write is refused with "Only admins can upload SVG files."
+
+**AC-ENT-90.** *Given* a custom-property definition carrying a `selection` key on a property whose type is `char`, *when* the definition is written, *then* the write fails with "Invalid property parameter 'selection'".
+
+**AC-ENT-91.** *Given* a custom-property definition whose name is `Colour Code`, *when* the definition is written, *then* the write fails with "Wrong property field value name 'Colour Code'." because the name holds a capital letter and a space.
+
+**AC-ENT-92.** *Given* a custom-property definition of type `many2one` whose target entity was removed with its package, *when* the definition is read back, *then* the entry is returned with its target cleared and its filter removed, and no failure is raised.
+
+**AC-ENT-93.** *Given* one write naming a monetary amount, the currency field of that amount and a one-to-many of lines, *when* the write runs, *then* the currency is applied first, the amount is rounded to that currency's precision, and the line commands run last.
+
+**AC-ENT-94.** *Given* a one-to-many written with the command list Create, Link, Delete in that order, *when* the write runs, *then* the deletion is performed first, the creation second and the link last, whatever the order in the list.
+
+**AC-ENT-95.** *Given* a record being created and a command list holding a single Set over two existing records that belong to another owner, *when* the create runs, *then* the Set degrades to a Link of those two records and no record is unlinked from its current owner.
+
+**AC-ENT-96.** *Given* a not-null constraint added to a computed stored field of a table that already holds rows, *when* the schema is synchronised, *then* the existing rows are scheduled for recomputation rather than filled with the field's default, and the constraint is added last.
+
+**AC-ENT-97.** *Given* a deletion refused by a foreign key, *when* the failure is reported, *then* the text is "The operation cannot be completed: " followed by "Another model is using the record you are trying to delete.", a blank line, "The troublemaker is: " the entity display, "Thanks to the following constraint: " the field display, and "How about archiving the record instead?"
+
+**AC-ENT-98.** *Given* a markup field declaring overridable sanitising and a stored value that the sanitiser would change, *when* a user who is not a member of the bypass group writes to it, *then* the write is refused with the restricted-content message naming the entity and the field, and a difference report is recorded in the diagnostic log.
+
 ---
 
 ## 27. Reconciliation notes
 
-The two drafts merged into this document disagreed on five points, and three organisational decisions are recorded with them.
+Five behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below was verified against the running system.
 
-1. **Where the filter grammar lives.** One draft carried the whole grammar here, the other carried it with the operations that consume filters. It now lives in [record operations and query notation, section 4](record-operations-and-query-notation.md#4-the-filter-notation). [Section 20](#20-the-filter-grammar) keeps what belongs to fields: the two notations at a glance, the three contributions this document makes to how a condition compiles, and the three forms in which a filter is stored. Nothing was dropped in the move, and no rule is stated in both places.
-2. **The rounding rule.** One draft described rounding as "half away from zero" and stopped there. The observed routine takes an explicit step, applies one of five tie-breaking methods, and adds a tolerance derived from the magnitude of the normalised value in order to correct binary representation error; without the tolerance, 2.675 rounds to 2.67 rather than 2.68. [Section 6.4](#64-decimal-number) states the full routine, and criteria AC-ENT-68 to AC-ENT-70 assert it.
-3. **Comparison against the zero test.** One draft treated "compare at a precision" and "is the difference zero at a precision" as the same operation. They differ: comparison rounds each operand before subtracting, while the zero test rounds the difference. Both are specified, with the worked example that separates them, and criterion AC-ENT-71 asserts the difference.
-4. **Where company consistency is specified.** One draft carried the whole algorithm here, the other in the multi-company document. [Section 15.5](#155-company-consistency) keeps the part that is a property of fields — the declaration, which fields are checked, the ordinary against company-dependent split, and the elevated archived-visible reads — and the algorithm, the entity families and the message are in [multi-company, section 6](multi-company.md#6-the-company-consistency-check).
-5. **The precedence of a recorded default.** One draft placed the recorded default after the declared default in every case. It is consulted **before** the declared default for an ordinary field and **after** it for a company-dependent field, which is why the resolution order of [section 13.1](#131-the-resolution-order) has five steps rather than four. Invariant 11 of [section 25](#25-invariants-a-rebuild-must-preserve) states the corrected order.
-6. **Where the schema derivation belongs.** One draft described only that a schema synchronisation happens, and left the rules to the package system; the other specified the rules. The rules are here, in [section 22](#22-deriving-the-database-schema), because every one of them is decided by a field attribute; [the package system](package-system.md) states only when the synchronisation runs.
-7. **Naming.** One draft used the words "delegation" and "delegate field", the other "embedding" and "link field". This document uses embedding and link field, matching [inheritance and extension](inheritance-and-extension.md), and says once that the mechanism is the same one.
-8. **Acceptance criteria identifiers.** The two drafts numbered their scenarios independently. They are unified here in one series with the prefix `AC-ENT`, and scenarios that appeared in both are stated once.
+1. **Where the filter grammar lives.** The grammar could sit with the fields it constrains or with the operations that consume filters. It lives in [record operations and query notation, section 4](record-operations-and-query-notation.md#4-the-filter-notation). [Section 20](#20-the-filter-grammar) keeps what belongs to fields: the two notations at a glance, the three contributions this document makes to how a condition compiles, and the three forms in which a filter is stored. Nothing was dropped in the move, and no rule is stated in both places.
+2. **The rounding rule.** Describing the rounding of a decimal number as "half away from zero" and stopping there is wrong. The routine takes an explicit step, applies one of five tie-breaking methods, and adds a tolerance derived from the magnitude of the normalised value in order to correct binary representation error; without the tolerance, 2.675 rounds to 2.67 rather than 2.68. [Section 6.4](#64-decimal-number) states the full routine, and criteria AC-ENT-68 to AC-ENT-70 assert it.
+3. **Comparison against the zero test.** "Compare at a precision" and "is the difference zero at a precision" look like the same operation and are not: comparison rounds each operand before subtracting, while the zero test rounds the difference. Both are specified, with the worked example that separates them, and criterion AC-ENT-71 asserts the difference.
+4. **Where company consistency is specified.** [Section 15.5](#155-company-consistency) keeps the part that is a property of fields — the declaration, which fields are checked, the ordinary against company-dependent split, and the elevated archived-visible reads. The algorithm, the entity families and the message are in [multi-company, section 6](multi-company.md#6-the-company-consistency-check).
+5. **The precedence of a recorded default.** A recorded default is not simply consulted after the declared default. It is consulted **before** the declared default for an ordinary field and **after** it for a company-dependent field, which is why the resolution order of [section 13.1](#131-the-resolution-order) has five steps rather than four. Invariant 11 of [section 25](#25-invariants-a-rebuild-must-preserve) states the order.
+6. **Where the schema derivation belongs.** Every rule that derives the database schema is decided by a field attribute, so the rules are here, in [section 22](#22-deriving-the-database-schema); [the package system](package-system.md) states only when the synchronisation runs.
+7. **Naming.** The mechanism by which a record carries the fields of a parent record is called **embedding**, and the many-to-one that carries it is called the **link field**, matching [inheritance and extension](inheritance-and-extension.md). The words "delegation" and "delegate field" name the same mechanism in other treatments of this subject and are not used here.
+8. **The stored type discriminators of a custom property.** The fourteen values listed in [section 6.16](#616-custom-properties) are the values written into the definition document and read back by integrations, so they are reproduced exactly, with their meaning in words beside them, rather than being renamed into the type vocabulary this document uses for ordinary fields.
+9. **Acceptance criteria identifiers.** The scenarios of this document are numbered in one series with the prefix `AC-ENT`.
 
 ---
 

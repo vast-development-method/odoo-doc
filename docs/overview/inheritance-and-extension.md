@@ -962,6 +962,10 @@ The specification node names the node to find, by one of three strategies:
 | A field node | The **first** field node of the source whose name attribute is equal. Only the name is compared; other attributes are ignored, because a field appears at most once at a given level of a view. |
 | Any other node | The **first** node of the source with the same node name **all** of whose attributes, except the position, are equal to the specification's. |
 
+**A translated attribute may never be used as a selector.** Twenty attributes carry text that is translated per language, so a specification that matched on one of them would match in the language it was written in and match nothing in every other. The attributes are `string`, `add-label`, `help`, `sum`, `avg`, `confirm`, `placeholder`, `alt`, `title`, `label`, `value_label`, `data-tooltip`, `confirm-label`, `confirm-title`, `cancel-label`, `aria-label`, `aria-keyshortcuts`, `aria-placeholder`, `aria-roledescription` and `aria-valuetext`, together with the computed-text variant of each, written with the prefix `t-attf-`. Using one of them — as an attribute of a specification node that is not a path expression, or inside the expression of a path-expression node — is refused with **"View inheritance may not use attribute '"** the attribute name **"' as a selector."** The check runs over every node of the extending view that carries a position attribute, before the extension is applied.
+
+A related condition is not refused but recorded: a path expression that filters on the presentation-class attribute by equality is fragile, because a node usually carries several classes. Such an expression records a diagnostic line advising the class-containment function instead, naming the view and its external identifier, and the extension is applied unchanged.
+
 Three consequences:
 
 1. **Matching is by first occurrence.** A specification that could match two nodes silently takes the first.
@@ -1496,6 +1500,10 @@ These are not enforced; they are the conditions under which the mechanisms above
 
 **AC-EXT-72.** *Given* an entity whose display-name field is declared but absent from the resolved field set, *when* the registry is built, *then* the build fails with the message naming the entity and the field.
 
+**AC-EXT-73.** *Given* an extending view whose specification node is a field node carrying the attribute `string` with the value `Customer` and a position, *when* it is saved, *then* the save is refused with "View inheritance may not use attribute 'string' as a selector."
+
+**AC-EXT-74.** *Given* an extending view whose path expression selects a node by its `help` attribute, *when* it is saved, *then* the save is refused with the same message naming `help`, because the check applies to a path expression exactly as it applies to an attribute-matched node.
+
 ---
 
 ## 20. Glossary
@@ -1524,14 +1532,14 @@ These are not enforced; they are the conditions under which the mechanisms above
 
 ## 21. Reconciliation notes
 
-The two drafts merged into this document disagreed on six points. Each was settled against the observed behaviour of the system.
+Six points in this document are easy to get wrong, and in four of them the natural assumption is the opposite of the observed behaviour. Each was verified against the running system.
 
-1. **Precedence among several named sources.** One draft stated that when a definition names several sources and two of them declare the same field, the *last* named source wins. The observed rule is the opposite: the base list is built by adding the definition first and then each named source in declaration order, and the composition order preserves that order, so the **first** named source has the highest precedence. This is also what makes adoption of an abstract behaviour work, since the adopting entity lists its own name before the abstract entity. [Section 3.2](#32-ordering-of-named-sources), [section 6.1](#61-the-composition-order) and the row of [section 16](#16-resolution-order) state the corrected rule, and acceptance criterion AC-EXT-9 asserts it.
-2. **The foundation entity's transport name.** One draft called the implicit ancestor of every entity by an invented name. Its transport name is `base`, the same word as the foundation package's technical name; both are reproduced identifiers. This document uses `base`.
-3. **The wording of refusals.** One draft restated the build-time refusals in neutral prose; the other reproduced them verbatim. The verbatim text is kept, because a refusal's exact text is observable behaviour that support procedures and automated checks key on. The condition that produces each message is described in words next to it.
-4. **The requirements on an embedding link field.** One draft required only that the named field exist and be a many-to-one. The field must in addition be flagged as the carrier of the embedding, be required, and declare a deletion behaviour of `cascade` or `restrict`; a link field that fails any of those is refused with its own message. [Section 4.1](#41-the-declaration) states the full set.
-5. **The selection removal policies.** One draft named the policies in prose only. The stored policy keywords are `set null`, `cascade`, `set default` and `set <code>`, and they are reproduced in code font because a package declares them literally; the default when none is declared is `set null`.
-6. **Acceptance criteria identifiers.** The two drafts numbered their scenarios in two different series. They are unified here in one series with the prefix `AC-EXT`, and scenarios that appeared in both are stated once.
+1. **Precedence among several named sources.** When a definition names several sources and two of them declare the same field, the *last* named source does **not** win. The base list is built by adding the definition first and then each named source in declaration order, and the composition order preserves that order, so the **first** named source has the highest precedence. This is also what makes adoption of an abstract behaviour work, since the adopting entity lists its own name before the abstract entity. [Section 3.2](#32-ordering-of-named-sources), [section 6.1](#61-the-composition-order) and the row of [section 16](#16-resolution-order) state the rule, and acceptance criterion AC-EXT-9 asserts it.
+2. **The foundation entity's transport name.** The implicit ancestor of every entity is not a notional construct with an invented name: its transport name is `base`, the same word as the foundation package's technical name, and both are reproduced identifiers. This document uses `base`.
+3. **The wording of refusals.** Every build-time refusal is reproduced verbatim rather than restated in neutral prose, because a refusal's exact text is observable behaviour that support procedures and automated checks key on. The condition that produces each message is described in words next to it.
+4. **The requirements on an embedding link field.** It is not enough for the named field to exist and be a many-to-one. It must in addition be flagged as the carrier of the embedding, be required, and declare a deletion behaviour of `cascade` or `restrict`; a link field that fails any of those is refused with its own message. [Section 4.1](#41-the-declaration) states the full set.
+5. **The selection removal policies.** The policies are not merely prose descriptions: the stored policy keywords are `set null`, `cascade`, `set default` and `set <code>`, reproduced in code font because a package declares them literally, and the default when none is declared is `set null`.
+6. **Acceptance criteria identifiers.** The scenarios of this document are numbered in one series with the prefix `AC-EXT`.
 
 ---
 

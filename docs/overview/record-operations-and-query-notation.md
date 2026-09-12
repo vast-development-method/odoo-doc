@@ -568,7 +568,7 @@ A lower-level form of the same operation returns the **query** rather than the r
 7. Every protected field that is computed and **not** in the value map is recomputed first, so that the protection does not freeze a stale value.
 8. With the protected set protected:
    1. the relation-modifying fields are marked as modified in **before mode**;
-   2. the fields are written in ascending declared write order;
+   2. the fields are written in ascending declared write order — rank 0 for ordinary fields, rank 10 for monetary amounts and the custom-property value field, rank 20 for the to-many fields, as [the entity and field system, section 5.2](entity-and-field-system.md#52-storage-attributes) sets out;
    3. every written field is marked as modified;
    4. when the entity stores the materialised ancestor path and the parent field was written, the parent field is flushed;
    5. validations watching a written non-inversible field run on the records that exist in the database;
@@ -583,7 +583,7 @@ A lower-level form of the same operation returns the **query** rather than the r
 3. Records whose cached value already equals the new cached value are **skipped**. For a monetary field the skip additionally requires the cached value to be correctly rounded for that record's currency.
 4. The cache is updated and the records are marked dirty for that field, which enqueues the column update.
 
-Relational fields override this: a many-to-one also removes the records from the old target's cached inverse list and adds them to the new target's; a to-many field executes the command list of [the entity and field system, section 7.5](entity-and-field-system.md#75-writing-to-a-to-many-field).
+Relational fields override this: a many-to-one also removes the records from the old target's cached inverse list and adds them to the new target's; a to-many field executes the command list of [the entity and field system, section 7.5](entity-and-field-system.md#75-writing-to-a-to-many-field), which also specifies in what order the commands of one list take effect — which of them run at once and which accumulate until the end of the list — separately for a one-to-many and for a many-to-many.
 
 ### 8.3 Assignment through a record attribute
 
@@ -627,7 +627,7 @@ A mixed set is split into these three groups and each is handled accordingly.
 
 | Declared policy on the incoming many-to-one | Effect |
 |---|---|
-| `restrict` | The deletion is refused by the database; the platform reports **"Another model is using the record you are trying to delete."** followed by the entity and the constraint, and the suggestion **"How about archiving the record instead?"** |
+| `restrict` | The deletion is refused by the database; the platform reports **"Another model is using the record you are trying to delete."** followed by the entity and the constraint, and the suggestion **"How about archiving the record instead?"**. [The entity and field system, section 15.3](entity-and-field-system.md#153-database-constraints) gives the message in full, with the two intervening lines and the rules that compose the entity and field placeholders |
 | `cascade` | The referencing rows are deleted by the database |
 | `set null` | The referencing columns are emptied by the database |
 
@@ -1169,11 +1169,13 @@ The column paths are: the external identifier; the name; the external identifier
 
 ## 22. Reconciliation notes
 
-1. **Where the filter grammar lives.** One draft placed the grammar inside the entity and field system, the other inside this document. It is here, because this document is where every operation that consumes a filter is specified and because the grammar is longer than the rest of that document's field material put together. [The entity and field system, section 20](entity-and-field-system.md#20-the-filter-grammar) keeps the definition of a filter, the two notations at a glance and the three forms in which a filter is stored, and links here for the operators, the empty-value rules, the optimisation stages and the per-type semantics. No rule is stated twice.
-2. **The operator set.** One draft listed the operators in their transport spelling only, the other described them in prose only. Both are kept: the transport spellings are reproduced in code font, because a caller writes them literally, and every one carries its meaning in words.
-3. **Empty values.** The two drafts agreed on the rule and gave different examples. Both example sets are kept, because between them they cover the integer, text, boolean and many-to-one cases, and each case behaves differently.
-4. **The naming of the unrestricted mode.** One draft said "superuser", the other "elevated rights". This document uses elevated rights for the flag and the root identity for the special user, matching [the security model](security-model.md); the identifier `1` of the root identity is reproduced because integrations depend on it.
-5. **The load operation.** One draft specified the generic load here and the package data files elsewhere; the other mixed them. The split is kept: [section 15](#15-the-generic-load-operation) specifies the operation, [the package system](package-system.md) specifies when a package's data files are loaded, and [data loading and exchange](../data/data-loading-and-exchange.md) specifies the file formats and the record declaration grammar.
+Five decisions about the shape of this document are recorded so that a reader who expects a subject elsewhere can find it, and so that a rebuild knows which of two plausible readings was verified against the running system.
+
+1. **Where the filter grammar lives.** The grammar could sit with the fields it constrains or here. It is here, because this document is where every operation that consumes a filter is specified and because the grammar is longer than the rest of that document's field material put together. [The entity and field system, section 20](entity-and-field-system.md#20-the-filter-grammar) keeps the definition of a filter, the two notations at a glance and the three forms in which a filter is stored, and links here for the operators, the empty-value rules, the optimisation stages and the per-type semantics. No rule is stated twice.
+2. **The operator set.** Each operator is given twice over: its transport spelling is reproduced in code font, because a caller writes it literally, and its meaning is stated in words. Neither form alone is enough for a rebuild.
+3. **Empty values.** The rule is one rule, but it needs four examples to be usable, because the integer, text, boolean and many-to-one cases each behave differently. All four are kept.
+4. **The naming of the unrestricted mode.** This document says **elevated rights** for the flag and **the root identity** for the special user, matching [the security model](security-model.md); the identifier `1` of the root identity is reproduced because integrations depend on it.
+5. **The load operation.** [Section 15](#15-the-generic-load-operation) specifies the operation itself, [the package system](package-system.md) specifies when a package's data files are loaded, and [data loading and exchange](../data/data-loading-and-exchange.md) specifies the file formats and the record declaration grammar. The three do not repeat one another.
 
 ---
 

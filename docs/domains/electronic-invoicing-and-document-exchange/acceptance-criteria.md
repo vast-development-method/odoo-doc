@@ -140,6 +140,12 @@ Unless a scenario says otherwise, the fixture is: a company established in Belgi
 
 **EIDI-AC-079.** Given a document with a quantity of five, a unit price of `100.00` and a discount of twenty percent generated with the plain 2.0 syntax, When the file is read, Then the line net amount is `400.00`, the gross unit price is `100.00` and the discount allowance amount is `100.00`. *(Section 4 of [calculations.md](calculations.md))*
 
+**EIDI-AC-080.** Given the delivery location code package installed and a customer whose delivery address carries the code `222222222222`, and a posted customer invoice for that customer with one line of quantity one, unit price `100.00` and a tax at twenty one percent, When the file is generated with the Peppol billing 3.0 profile, Then the delivery node carries a delivery location whose identifier element holds the text `222222222222` with the attribute `schemeID` holding `0088`, and the address of that delivery location carries the street, the city, the postal code and the country of the delivery address. *(Section 15.6 of [entities.md](entities.md))*
+
+**EIDI-AC-081.** Given the same invoice but with the delivery location code of the delivery address left empty, or with the delivery location code package not installed, When the file is generated, Then the delivery location carries its address and no identifier element at all, and the generation reports no error. *(Section 15.6 of [entities.md](entities.md))*
+
+**EIDI-AC-082.** Given the same invoice generated with the plain 2.0 syntax instead, When the file is generated, Then the delivery location of the delivery node carries the same identifier element, with the same text and the same scheme attribute, taken from the shipping address of the document. *(Section 15.6 of [entities.md](entities.md))*
+
 ---
 
 # 6. Export: the cross industry invoice mapping
@@ -169,6 +175,12 @@ Unless a scenario says otherwise, the fixture is: a company established in Belgi
 **EIDI-AC-101.** Given a tax group whose aggregated tax amount rounds to a negative zero, When the file is generated, Then the calculated amount element carries exactly `0.00`.
 
 **EIDI-AC-102.** Given a customer invoice sent to a commercial contact established in Germany, When the file name is read, Then it ends with `_zugferd` with the extension `xml`; for any other country it ends with `_factur_x` with the extension `xml`; and the copy embedded inside the printed document is always named `factur-x` with the extension `xml`.
+
+**EIDI-AC-103.** Given a company established in France, a customer established in France whose delivery address is a child contact named `FR Partner Delivery` at `Rue Napoléon, 55`, `75000` `Paris`, carrying the delivery location code `5412345000008`, and a posted invoice for that customer, When the cross industry invoice file is generated, Then the ship-to trade party carries an identifier element holding the text `5412345000008` with the attribute `schemeID` holding `0088`, followed by the name element holding `FR Partner Delivery`. *(Section 15.6 of [entities.md](entities.md))*
+
+**EIDI-AC-104.** Given the same invoice, When the seller trade party and the buyer trade party are read, Then neither carries an identifier element, because both pass an empty delivery location code to the same node builder, whatever code their own contacts carry. *(Section 15.6 of [entities.md](entities.md))*
+
+**EIDI-AC-105.** Given the same invoice with the delivery location code of the delivery address left empty, When the file is generated, Then the ship-to trade party carries no identifier element and begins directly with its name element. *(Section 15.6 of [entities.md](entities.md))*
 
 ---
 

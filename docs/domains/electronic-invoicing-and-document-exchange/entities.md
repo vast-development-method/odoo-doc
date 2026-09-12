@@ -582,7 +582,20 @@ The warning structure may contain any of these entries:
 | `peppol_endpoint` | Every character that is not a letter or a digit is removed from the typed value. |
 | `phone_number` | The typed value is parsed using the country of `selected_company` as the default region and rewritten in the international format. A value that cannot be parsed is left untouched. |
 
-## 9.4 Operations
+## 9.4 Four alias fields
+
+The wizard carries four further fields that are pure aliases and hold no value of their own. They exist so that a screen definition written against the older names keeps resolving; a replacement reproduces the names and the aliasing, and makes no decision from them.
+
+| Field | Type | What it aliases |
+|---|---|---|
+| `is_branch_company` | boolean, never stored and never derived | nothing; it is always false and nothing ever writes it |
+| `active_parent_company` | many_to_one to Company, related | `parent_company` |
+| `active_parent_company_name` | text, related | `parent_company_name` |
+| `can_use_parent_connection` | boolean, related | `show_parent_connection_choice` |
+
+---
+
+## 9.5 Operations
 
 Full procedures are in [peppol-network.md](peppol-network.md). The surface is: `mandatory_fields_check()`, `forbid_approved_platform_through_network()`, `open_form(reopen)`, `send_notification(title, message)`, `check_connection_answer(answer, chosen_authentication)`, `generate_connect_token(identifier, company)`, `decode_connect_token(token)`, `can_connect()`, `create_connection(identifier, database_identifier, company, authentication_token)`, `company_details(company)`, `register_with_identity_provider()`, `register_participant(chosen_authentication)`.
 
@@ -624,6 +637,17 @@ When the state is `receiver` and `service_data` is non empty, one Peppol Service
 | `remove_from_network()` | When a credential exists, run the full deregistration. Otherwise reset the participant configuration of the company. Returns true. |
 | `downgrade_to_sender()` | When a credential exists, unpublish the participant from the service directory and set the state back to `sender`. |
 | `upgrade_to_receiver()` | When a credential exists, run the registration of the sender as a receiver, then poll the participant state. When the state became `smp_registration`, return a success notification with the title `Registered to receive documents via Peppol.` and the message `Your registration on Peppol network should be activated within a day. The updated status will be visible in Settings.` |
+
+## 10.5 Two self billing fields
+
+The wizard carries two further fields that reach the self billing fields of the company described in section 16.5.
+
+| Field | Type | Behaviour |
+|---|---|---|
+| `peppol_activate_self_billing` | boolean, derived from `company.peppol_activate_self_billing_sending`, not stored, writable | Reading it returns the company flag. Writing it writes the company flag and, in the same step, sets the enabled flag of every service line of the wizard whose document type identifier is one of the two self billing document type identifiers of section 5 of [peppol-network.md](peppol-network.md) to the value written. |
+| `peppol_self_billing_reception_journal_id` | many_to_one to Journal, related to `company.peppol_self_billing_reception_journal_id`, writable | Reading and writing pass straight through to the company field, including the reception mark write described in section 16.5. |
+
+Neither field appears on the advanced participant form of section 8.7 of [interfaces.md](interfaces.md), so neither can be reached from a screen; both remain reachable through the transport interface. The compatibility finding of section 16.5 applies to them unchanged.
 
 ---
 
@@ -732,6 +756,20 @@ Apply the first row of the table below whose condition holds. The placeholder wr
 | 4 | codes were collected but none of the rows above applies | `AB` |
 
 **Derivation of `network_can_send_response`:** true when `network_message_identifier` is set, the document type is a vendor bill or a vendor credit note, no existing response is in state `not_serviced` and no existing response that is not in state `error` carries the code `AP` or `RE`, and the partner supports the response service.
+
+**Advanced reference fields.** A further capability package adds seven free text fields to the accounting document. Each of them is stored, is copied when the document is duplicated, is not tracked, is not derived and carries no constraint. They exist so that a deployment which must carry one of these references into an outgoing file has a stable place to keep it.
+
+| Field | Full name | Meaning | Element of the universal business language family it is meant to feed |
+|---|---|---|---|
+| `peppol_contract_document_reference` | contract document reference | A reference to the contract under which the document is issued. | the identifier of the contract document reference of the document |
+| `peppol_project_reference` | project reference | A reference to the project the document belongs to. | the identifier of the project reference of the document |
+| `peppol_originator_document_reference` | originator document reference | A reference to the document that originated the order. | the identifier of the originator document reference of the document |
+| `peppol_despatch_document_reference` | despatch document reference | A reference to the despatch advice that accompanied the goods. | the identifier of the despatch document reference of the document |
+| `peppol_additional_document_reference` | additional document reference | A reference to one supporting document; the field holds a single reference, not a list. | the identifier of the additional document reference of the document |
+| `peppol_accounting_cost` | accounting cost | A textual description or a code identifying the buyer accounting cost centre. | the accounting cost of the document |
+| `peppol_delivery_location_id` | delivery location code | The location code of the delivery location in the international article number location scheme `0088`. | the identifier of the delivery location of the delivery node |
+
+**Compatibility finding.** The seven fields are stored and writable through the transport interface, yet no screen of the system shows them and none of the shipped profiles reads them, so setting one of them changes no produced file. Their labels carry a marker stating that they are no longer maintained. A corrected behaviour would either map each field onto the element named in the table above, or remove the fields and let a deployment use the user defined extension mechanism of section 20.3 of [universal-business-language-mapping.md](universal-business-language-mapping.md) instead. This specification records the fields because a replacement that must read an existing database will find them populated, and because the transport names are part of the storage contract; it does not require that a replacement produce any element from them.
 
 ## 12.4 Posting
 
@@ -932,6 +970,7 @@ The selectable exemption reason codes and the full sentence each expands to are 
 | `participant_verification_state` | selection: `not_verified` (Unchecked), `not_valid` (Partner is not on Peppol), `not_valid_format` (Partner cannot receive format), `valid` (Partner is on Peppol); one value per company | no | `not_verified` | stored per company | no | The result of the last participant lookup for this contact. |
 | `participant_supported_documents` | structured_data | no | empty | stored | no | The document type identifiers the participant publishes. |
 | `participant_supports_responses` | boolean | no | derived | derived from `participant_supported_documents` and `participant_verification_state`, not stored | no | True when the verification state is `valid` and the response transaction identifier is among the published document types. |
+| `global_location_number` | text | no | empty | stored | no | The location code of this address in the international article number location scheme, whose scheme identifier is `0088`. It is contributed by a separate capability package; when that package is absent the field does not exist at all and every mapping that reads it is skipped without error. Section 15.6 gives the complete behaviour. |
 
 ## 15.1 Derivation of `peppol_electronic_address_scheme`
 
@@ -992,6 +1031,19 @@ These rules are enforced as a validation whenever `peppol_endpoint` changes and 
 ## 15.5 On change behaviour
 
 Editing `invoice_electronic_format`, `peppol_endpoint` or `peppol_electronic_address_scheme` triggers the participant verification immediately, so that the interface can warn before the document is sent. When the commercial partner link is not yet computed it is computed first.
+
+## 15.6 The delivery location code
+
+The field `global_location_number` holds the code that identifies a physical location in the international article number location scheme. The scheme identifier of that scheme is `0088`, the same value that appears in the electronic address scheme catalogue of [configuration.md](configuration.md).
+
+1. **Where it is offered.** The field is shown on the contact form and on the embedded form of a child address, and only when the address type of that contact is the delivery type. It is free text: no length, no check digit and no format is enforced, so a rebuild stores whatever the user types. **Industry-standard default:** a rebuild that wants to validate the value checks that it is thirteen digits and that the last digit is the modulo ten check digit of the first twelve; this specification records that the system as observed performs no such check.
+2. **Who may write it.** The field carries no field level restriction, so any user who may write the contact may write it.
+3. **Optional package.** The field exists only when the capability package that contributes it is installed. Every mapping that reads it first asks whether the field exists on the contact; when it does not, the mapping produces nothing and reports no error. A rebuild that always defines the field obtains the same observable result, because an empty value and an absent field lead to the same omission.
+4. **Where it is read on export, universal business language family.** The delivery node of the current builder writes, for the delivery address of the accounting document, an identifier element inside the delivery location whose scheme attribute holds `0088` and whose text holds the code. The element and both of its attributes are omitted when the package is absent or the code is empty. The plain 2.0 builder writes the same element for the shipping address of the document. The mapping rows are in [universal-business-language-mapping.md](universal-business-language-mapping.md).
+5. **Where it is read on export, cross industry invoice family.** The ship-to trade party node writes an identifier element whose scheme attribute holds `0088` and whose text holds the code of the shipping address, and omits the element entirely when the code is empty. The seller trade party and the buyer trade party never write it: they pass an empty code to the same node builder, so the element is always absent from them. The mapping row is in [cross-industry-invoice-mapping.md](cross-industry-invoice-mapping.md).
+6. **Where it is read on import.** No import step writes this field. A received file that carries a delivery location identifier leaves the field of the matched or created contact empty.
+
+---
 
 ---
 
@@ -1054,6 +1106,27 @@ On creation, the default value of the per company participant verification state
 | `proxy_type()` | The service of the existing exchange network credential, defaulting to the base exchange network service. |
 | `is_french_company()` | True when the fiscal country is France, Guadeloupe, Martinique or Réunion, or when the scheme is one of the French schemes. |
 | `allows_document_reception()` | True. An extension point for localisations that forbid reception. |
+
+## 16.5 The two self billing fields
+
+Two further fields are stored on a company. Both concern self billing, that is the case in which the buyer issues the invoice on behalf of the seller.
+
+| Field | Type | Required | Default | Stored or derived | Tracked | Meaning |
+|---|---|---|---|---|---|---|
+| `peppol_activate_self_billing_sending` | boolean | no | false | stored | no | Whether this company may hand vendor bills to the network as self billed invoices. |
+| `peppol_self_billing_reception_journal_id` | many_to_one to Journal, restricted to sale journals | no | derived | derived from `participant_state`, stored, writable | no | The sale journal in which self billed documents received from the network would be created as drafts. |
+
+**Derivation of `peppol_self_billing_reception_journal_id`.** Whenever the participant state of the company changes, and only when the field is still empty and the company may send, it is set to the first sale journal of that company in the default order, and that journal is marked with the reception mark. Writing the field directly first clears the reception mark from every sale journal of the company and then sets it on the journal written. Both the derivation and the write therefore place the reception mark on a sale journal.
+
+**Compatibility finding.** Neither field takes part in any live decision.
+
+1. The eligibility of a document for self billed export is decided by `is_exportable_as_self_invoice()` of section 12.11, which reads the self billing flag of the journal of the document, never `peppol_activate_self_billing_sending`.
+2. The journal in which a received self billed document is created is chosen by the routing of section 13 of [workflows.md](workflows.md), which searches for the first sale journal of the company whose self billing flag is true, never the journal held in `peppol_self_billing_reception_journal_id`.
+3. The reception mark that the derivation places on a sale journal is read in only two places, and both additionally require the journal to be a purchase journal: the visibility of the fetch button of section 8.1 of [interfaces.md](interfaces.md) and the type constraint of rule **EIDI-RULE-009**. A reception mark on a sale journal therefore has no observable effect, and the type constraint does not fire because it only refuses a change of type away from a purchase journal.
+
+A corrected behaviour would either remove both fields and keep the journal level self billing flag as the single source of truth, or make the two routing decisions read them. A replacement must reproduce the two fields because they are part of the storage contract, must reproduce the reception mark write because a reader of the journal list observes it, and must not let either field change the routing.
+
+---
 
 ---
 

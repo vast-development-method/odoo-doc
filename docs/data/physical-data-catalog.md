@@ -143,6 +143,92 @@ The same columns counted by the type the storage engine reports, across all 1,24
 | `bigint` | sixty-four bit integer | 20 |
 | `bytea` | binary string | 12 |
 
+Of the 2,654 `character varying` columns, 2,602 are declared without a maximum length and 52 carry one. A maximum length is a property of the column that a replacement must create with the column, because a value longer than the maximum is truncated on write rather than refused, and a replacement whose column is unbounded would keep text that the original silently shortened. The 52 bounded columns, counted by the maximum they declare:
+
+| Maximum length in characters | Columns |
+|---|---|
+| 1024 | 1 |
+| 256 | 1 |
+| 128 | 1 |
+| 64 | 1 |
+| 50 | 1 |
+| 45 | 1 |
+| 43 | 1 |
+| 40 | 1 |
+| 32 | 2 |
+| 20 | 10 |
+| 16 | 3 |
+| 14 | 2 |
+| 13 | 2 |
+| 11 | 3 |
+| 10 | 2 |
+| 9 | 1 |
+| 8 | 4 |
+| 7 | 1 |
+| 5 | 4 |
+| 4 | 2 |
+| 3 | 4 |
+| 2 | 3 |
+| 1 | 1 |
+| **Total** | **52** |
+
+Each of those 52 columns, so that a replacement can declare the same bound on the same column:
+
+| Maximum length in characters | Table | Column | Entity | Transport name |
+|---|---|---|---|---|
+| 1024 | `ir_attachment` | `url` | Attachment | `ir.attachment` |
+| 256 | `l10n_fr_fec_export_wizard` | `filename` | Fichier Echange Informatise | `l10n_fr.fec.export.wizard` |
+| 128 | `hr_applicant` | `email_from` | Applicant | `hr.applicant` |
+| 64 | `fleet_vehicle_log_contract` | `ins_ref` | Vehicle Contract | `fleet.vehicle.log.contract` |
+| 50 | `discuss_channel` | `uuid` | Discussion Channel | `discuss.channel` |
+| 45 | `pos_config` | `proxy_ip` | Point of Sale Configuration | `pos.config` |
+| 43 | `iap_account` | `account_token` | in-app purchase Account | `iap.account` |
+| 40 | `ir_attachment` | `checksum` | Attachment | `ir.attachment` |
+| 32 | `hr_applicant` | `partner_phone` | Applicant | `hr.applicant` |
+| 32 | `ir_module_module` | `license` | Module | `ir.module.module` |
+| 20 | `account_journal` | `l10n_hr_business_premises_label` | Journal | `account.journal` |
+| 20 | `account_journal` | `l10n_hr_business_premises_label_refund` | Journal | `account.journal` |
+| 20 | `l10n_it_ddt` | `name` | Transport Document | `l10n_it.ddt` |
+| 20 | `res_company` | `l10n_it_eco_index_number` | Companies | `res.company` |
+| 20 | `stock_picking` | `l10n_ro_edi_stock_trailer_1_number` | Transfer | `stock.picking` |
+| 20 | `stock_picking` | `l10n_ro_edi_stock_trailer_2_number` | Transfer | `stock.picking` |
+| 20 | `stock_picking` | `l10n_ro_edi_stock_vehicle_number` | Transfer | `stock.picking` |
+| 20 | `stock_picking_batch` | `l10n_ro_edi_stock_trailer_1_number` | Batch Transfer | `stock.picking.batch` |
+| 20 | `stock_picking_batch` | `l10n_ro_edi_stock_trailer_2_number` | Batch Transfer | `stock.picking.batch` |
+| 20 | `stock_picking_batch` | `l10n_ro_edi_stock_vehicle_number` | Batch Transfer | `stock.picking.batch` |
+| 16 | `ir_module_module` | `state` | Module | `ir.module.module` |
+| 16 | `res_company` | `l10n_it_codice_fiscale` | Companies | `res.company` |
+| 16 | `res_partner` | `l10n_it_codice_fiscale` | Contact | `res.partner` |
+| 14 | `res_partner` | `l10n_es_edi_facturae_ac_logical_operational_point` | Contact | `res.partner` |
+| 14 | `res_partner` | `l10n_es_edi_facturae_ac_physical_gln` | Contact | `res.partner` |
+| 13 | `res_partner` | `l10n_hu_group_vat` | Contact | `res.partner` |
+| 13 | `res_partner` | `l10n_rs_edi_registration_number` | Contact | `res.partner` |
+| 11 | `res_country` | `l10n_ar_legal_entity_vat` | Country | `res.country` |
+| 11 | `res_country` | `l10n_ar_natural_vat` | Country | `res.country` |
+| 11 | `res_country` | `l10n_ar_other_vat` | Country | `res.country` |
+| 10 | `res_bank` | `l10n_cl_sbif_code` | Bank | `res.bank` |
+| 10 | `res_partner` | `l10n_es_edi_facturae_ac_center_code` | Contact | `res.partner` |
+| 9 | `res_partner` | `l10n_no_bronnoysund_number` | Contact | `res.partner` |
+| 8 | `account_analytic_line` | `code` | Analytic Line | `account.analytic.line` |
+| 8 | `account_move` | `fapiao` | Journal Entry | `account.move` |
+| 8 | `auth_totp_device` | `index` | Authentication Device | `auth_totp.device` |
+| 8 | `res_users_apikeys` | `index` | Users application programming interface Keys | `res.users.apikeys` |
+| 7 | `res_partner` | `l10n_it_pa_index` | Contact | `res.partner` |
+| 5 | `account_journal` | `code` | Journal | `account.journal` |
+| 5 | `res_partner` | `l10n_rs_edi_public_funds` | Contact | `res.partner` |
+| 5 | `res_partner` | `l10n_tr_nilvera_edispatch_customs_zip` | Contact | `res.partner` |
+| 5 | `stock_warehouse` | `code` | Warehouse | `stock.warehouse` |
+| 4 | `account_tax` | `l10n_de_datev_code` | Tax | `account.tax` |
+| 4 | `res_currency` | `l10n_ar_afip_code` | Currency | `res.currency` |
+| 3 | `account_incoterms` | `code` | Incoterms | `account.incoterms` |
+| 3 | `account_journal` | `l10n_ec_emission` | Journal | `account.journal` |
+| 3 | `account_journal` | `l10n_ec_entity` | Journal | `account.journal` |
+| 3 | `res_country` | `l10n_ar_afip_code` | Country | `res.country` |
+| 2 | `account_payment_term_line` | `days_next_month` | Payment Terms Line | `account.payment.term.line` |
+| 2 | `res_country` | `code` | Country | `res.country` |
+| 2 | `res_country_state` | `l10n_in_tin` | Country state | `res.country.state` |
+| 1 | `ir_model_constraint` | `type` | Model Constraint | `ir.model.constraint` |
+
 ## 4. Special storage forms
 
 ### 4.1 Per-language text
