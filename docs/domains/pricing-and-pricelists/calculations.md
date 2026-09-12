@@ -1470,29 +1470,29 @@ the whole group.
 - Each **combo item line** takes a prorated share of the combo product's price:
 
 ```formula
-combo_product_price = the display price of the combo line , computed as if it were an ordinary line
+combo_product_price       = the display price of the combo line , computed as if it were an ordinary line
 
-for each combo in the combo product:
-    combo_base_price( combo ) = convert_currency( the combo's base price ,
-                                                  the combo's currency → the line currency ,
-                                                  the line's company , the order date )
+combo_base_price( combo ) = convert_currency( the combo's base price ,
+                                              the combo's currency → the line currency ,
+                                              the line's company , the order date )
+                            , evaluated once for every combo of the combo product
 
-total_base = the sum of combo_base_price over all combos of the combo product
+total_base                = the sum of combo_base_price over all combos of the combo product
 
-if total_base is not zero:
-    combo_price( combo ) = round_to_currency( combo_base_price( combo ) × combo_product_price ÷ total_base )
-otherwise:
-    combo_price( combo ) = round_to_currency( combo_product_price ÷ the number of combos )
+combo_price( combo )      = round_to_currency( combo_base_price( combo ) × combo_product_price ÷ total_base )
+                            , when total_base is not zero
+combo_price( combo )      = round_to_currency( combo_product_price ÷ the number of combos )
+                            , when total_base is zero
 
-delta = combo_product_price − the sum of combo_price over all combos
-if delta is not zero:
-    combo_price( the last combo ) = combo_price( the last combo ) + delta
+delta                     = combo_product_price − the sum of combo_price over all combos
+combo_price( last combo ) = combo_price( last combo ) + delta
+                            , applied only when delta is not zero
 
-display price of this item line = combo_price( this line's combo )
-                                + convert_currency( this line's combo item extra price
-                                                    + the extra prices of its non-variant attributes ,
-                                                    the combo item's currency → the line currency ,
-                                                    the line's company , the order date )
+item line display price   = combo_price( this line's combo )
+                          + convert_currency( this line's combo item extra price
+                                              + the extra prices of its non-variant attributes ,
+                                              the combo item's currency → the line currency ,
+                                              the line's company , the order date )
 ```
 
 - The proration **rounds each share to the line currency** and then pushes the whole rounding
@@ -1998,10 +1998,97 @@ When a purchase order is confirmed, for each of its lines:
 | Currency | the line's currency |
 | Discount | the line's discount |
 | Lead time | **0** |
-| Vendor product name, vendor product code, unit | copied from the offer the line had selected, when it had selected one; otherwise left empty and defaulted |
+| Vendor product name and vendor product code | copied from the offer the **line** had selected, when it had selected one; otherwise left empty |
+| Unit | the **line's** unit, when the line had selected an offer; otherwise not written at all, so the field's own default applies — the variant's own unit when the offer names a variant, and the template's own unit otherwise |
 
 6. Write the new offer onto the product template with elevated rights, so that a buyer without
    product-write access can still confirm an order.
+
+### 15.11 The estimated price of a purchase suggestion
+
+The purchase suggestion screen proposes a quantity to buy for each product and shows what buying it
+would cost. The quantity itself belongs to
+[replenishment and procurement](../replenishment-and-procurement/); the **price** is this domain's,
+and it is the one place where the alternative ranking key of section 15.4 is used in a shipped flow.
+
+1. Read the suggested quantity of the product. When it is zero or below, the estimated price is
+   zero and no offer is looked for.
+2. Run the selection of section 15 with that quantity, with the vendor named in the calling context
+   when there is one, and with the purchase order of the calling context passed through to the
+   extension narrowings.
+3. When step 2 selects nothing, run the selection again with **no quantity at all** — which disables
+   the minimum-quantity filter entirely, by PR-148 of
+   [`business-rules.md`](business-rules.md#10-vendor-price-selection) — and with the **minimum
+   quantity** as the primary ranking key, so that the smallest quantity break wins.
+4. The unit price is the selected offer's **discounted price**, taken as it stands: it is expressed
+   per the product's own unit and in the **offer's** currency, and it is **not** converted into the
+   company's currency here, although the ranking that chose it did convert. A rebuild that displays
+   the estimate next to amounts in the company currency must either convert it or say which currency
+   it is in.
+5. When neither selection finds an offer, the unit price is the product's own cost.
+
+```formula
+estimated_unit_price = the discounted price of the offer selected at the suggested quantity
+estimated_unit_price = the discounted price of the offer selected with no quantity ,
+                       ranked first by minimum quantity ascending
+                                        , when the first selection found none
+estimated_unit_price = the product's cost
+                                        , when neither selection found one
+
+estimated_total      = estimated_unit_price × suggested_quantity
+```
+
+**Worked example.** The product "Screw" has two offers from the same vendor, both with sequence one,
+both in the company currency, neither carrying a discount and neither carrying validity dates. The
+product's own cost is fifteen.
+
+| Offer | Minimum quantity | Unit price | Discounted price |
+|---|---|---|---|
+| A | 50 | 10.00 | 10.00 |
+| B | 0 | 12.00 | 12.00 |
+
+*Suggested quantity sixty.* Both offers pass the minimum-quantity filter; both belong to the same
+vendor; the default ranking takes the lowest discounted price, which is offer A.
+
+```formula
+estimated_unit_price = 10.00
+estimated_total      = 10.00 × 60 = 600.00
+```
+
+*Suggested quantity thirty.* Offer A is rejected, because thirty is below fifty. Offer B survives
+and is selected.
+
+```formula
+estimated_unit_price = 12.00
+estimated_total      = 12.00 × 30 = 360.00
+```
+
+*Suggested quantity thirty, with the minimum quantities raised to fifty on offer A and forty on
+offer B.* The first selection finds nothing. The second runs with no quantity and with the minimum
+quantity as the primary key:
+
+```formula
+ranking key      = ( minimum quantity , discounted price , sequence , identifier ) , all ascending
+offer B          = ( 40 , 12.00 , 1 , the lower identifier )
+offer A          = ( 50 , 10.00 , 1 , the higher identifier )
+selected         = offer B
+
+estimated_unit_price = 12.00
+estimated_total      = 12.00 × 30 = 360.00
+```
+
+Offer B wins although it is the dearer of the two, because the smallest quantity break has become
+the first criterion. Had both offers carried a minimum quantity of forty, the discounted price would
+have decided, offer A would have been selected at ten, and the estimated total would have been three
+hundred.
+
+*A product with no offer at all.* Neither selection finds anything, so the product's own cost is
+used:
+
+```formula
+estimated_unit_price = 15.00
+estimated_total      = 15.00 × 30 = 450.00
+```
 
 ---
 
@@ -2009,31 +2096,36 @@ When a purchase order is confirmed, for each of its lines:
 
 ### 16.1 The raw price reader
 
+The reader takes a product, a price type — either "sales price" or "cost" — and optionally a unit, a
+currency, a company and a date. It answers one number.
+
+1. The company is the supplied company, or the acting company when none is supplied; the date is the
+   supplied date, or today in the acting time zone. The product is read **as that company**, and
+   with **elevated rights** when the price type is the cost.
+2. The starting amounts are taken from the product.
+3. The cost of a template with variants falls back to the first variant's cost.
+4. The attribute extra price is added for the sales price only.
+5. The unit conversion is applied only when a unit was supplied.
+6. The currency conversion is applied only when a currency was supplied, and it **rounds**.
+
 ```formula
-raw_price( product , price_type , unit , currency , company , date ) :
-    company = the supplied company , or the acting company
-    date    = the supplied date , or today in the acting time zone
-    read the product as that company
-    if price_type is "cost" : read with elevated rights
+price          = the product's field named by the price type , or zero
+price_currency = the product's currency
 
-    price          = the product's field named by price_type , or zero
-    price_currency = the product's currency
+price          = the first variant's cost           , when the price type is the cost , the product is a
+                                                      template , its own cost is zero and it has variants
+price_currency = the product's cost currency        , when the price type is the cost
 
-    if price_type is "cost" :
-        if the product is a template , its own cost is zero , and it has variants :
-            price = the first variant's cost
-        price_currency = the product's cost currency
-    if price_type is "sales price" :
-        price = price + the attribute extra price
+price          = price + the attribute extra price  , when the price type is the sales price
 
-    if a unit was supplied :
-        price = convert_price( price , product own unit → the supplied unit )
+price          = convert_price( price , product own unit → the supplied unit )
+                                                    , when a unit was supplied
 
-    if a currency was supplied :
-        price = convert_currency( price , price_currency → the supplied currency ,
-                                  company , date , rounded = YES )
+price          = convert_currency( price , price_currency → the supplied currency ,
+                                   company , date , rounded = YES )
+                                                    , when a currency was supplied
 
-    return price
+the answer     = price
 ```
 
 **The currency conversion here rounds**, unlike the one inside the base-price computation. That is
@@ -2121,14 +2213,20 @@ trigger the recomputation.
 
 ### 17.2 The margin and the margin percentage
 
+Two cases. The first applies to a line whose delivered quantity is non-zero **and** whose ordered
+quantity is zero; the second to every other line.
+
 ```formula
-if the delivered quantity is non-zero AND the ordered quantity is zero :
-    calculated_subtotal = unit_price × delivered_quantity
-    margin              = calculated_subtotal − ( purchase_price × delivered_quantity )
-    margin_percent      = margin ÷ calculated_subtotal        , or 0 when the subtotal is zero
-otherwise :
-    margin              = price_subtotal − ( purchase_price × ordered_quantity )
-    margin_percent      = margin ÷ price_subtotal             , or 0 when the subtotal is zero
+Case one — delivered but never ordered
+
+calculated_subtotal = unit_price × delivered_quantity
+margin              = calculated_subtotal − ( purchase_price × delivered_quantity )
+margin_percent      = margin ÷ calculated_subtotal        , or 0 when that subtotal is zero
+
+Case two — every other line
+
+margin              = price_subtotal − ( purchase_price × ordered_quantity )
+margin_percent      = margin ÷ price_subtotal             , or 0 when that subtotal is zero
 ```
 
 - The percentage is a **fraction**, displayed multiplied by one hundred.
@@ -2157,26 +2255,29 @@ Installed with the stock margin capability. It replaces the cost computation for
 product has **valued stock moves**, and only when the product category's cost method is **not**
 "standard".
 
+Three cases, tested in this order.
+
+1. A line with **no** valued stock moves falls through to the base computation of section 17.1.
+2. A line whose product category cost method is **not** the standard one takes the blend below.
+3. A line whose ordered quantity is zero while its delivered quantity is non-zero also falls through
+   to the base computation of section 17.1, even though it has valued moves.
+
 ```formula
-if the line has no valued stock moves :
-    fall through to the base computation of section 17.1
+Case two — the quantity-weighted blend
 
-else if the product's category cost method is not "standard" :
-    delivered              = the line's delivered quantity
-    delivered_unit_price   = the unit value of the done stock moves of this line , when delivered is above zero
-                             , otherwise zero
-    if delivered is zero or below :
-        cost_in_product_unit = the product's cost
-    otherwise :
-        remaining            = the larger of ( ordered quantity − delivered , 0 )
-        cost_in_product_unit = ( delivered × delivered_unit_price + remaining × the product's cost )
-                               ÷ ( delivered + remaining )
-    purchase_price = convert_to_line_currency(
-                         convert_price( cost_in_product_unit , product own unit → the line's unit ) ,
-                         the product's cost currency )
+delivered            = the line's delivered quantity
+delivered_unit_price = the unit value of the done stock moves of this line , when delivered is above zero
+                     = 0                                                   , otherwise
 
-else if the ordered quantity is zero and the delivered quantity is non-zero :
-    fall through to the base computation of section 17.1
+cost_in_product_unit = the product's cost                                  , when delivered is zero or below
+
+remaining            = the larger of ( ordered quantity − delivered , 0 )  , when delivered is above zero
+cost_in_product_unit = ( delivered × delivered_unit_price + remaining × the product's cost )
+                       ÷ ( delivered + remaining )                         , when delivered is above zero
+
+purchase_price       = convert_to_line_currency(
+                           convert_price( cost_in_product_unit , product own unit → the line's unit ) ,
+                           the product's cost currency )
 ```
 
 In words: **a partially delivered line blends the real cost of what has shipped with the standard
@@ -2234,19 +2335,19 @@ Everything else falls through to the previous computation.
 For the timesheet lines:
 
 ```formula
-for each such line , over its analytic lines that belong to a project :
-    amount_sum      = the sum of the analytic amounts
-    unit_amount_sum = the sum of the analytic unit amounts
+amount_sum            = the sum of the analytic amounts of the line's analytic lines that belong to a project
+unit_amount_sum       = the sum of the analytic unit amounts of those same analytic lines
 
-    average_cost_per_hour = − amount_sum ÷ unit_amount_sum      , or 0 when unit_amount_sum is zero
+average_cost_per_hour = − amount_sum ÷ unit_amount_sum      , or 0 when unit_amount_sum is zero
 
-cost_in_time_unit = average_cost_per_hour , or the product's cost when there were no analytic lines
+cost_in_time_unit     = average_cost_per_hour               , when there was at least one such analytic line
+cost_in_time_unit     = the product's cost                  , when there was none
 
-if the line's unit differs from the company's project time unit :
-    cost_in_time_unit = convert_QUANTITY( cost_in_time_unit ,
+cost_in_time_unit     = convert_QUANTITY( cost_in_time_unit ,
                                           the line's unit → the company's project time unit )
+                                                            , applied only when the two units differ
 
-purchase_price = convert_to_line_currency( cost_in_time_unit , the product's cost currency )
+purchase_price        = convert_to_line_currency( cost_in_time_unit , the product's cost currency )
 ```
 
 Three things to note.
@@ -2288,8 +2389,9 @@ zero" guards divide the expression by one rather than by zero for rate-less rows
 
 ## 18. Margins on a product — the analysis measures
 
-All fifteen measures are computed in one pass, for a set of products, from **posted (and
-optionally draft) invoice lines**. They are never stored.
+One operation computes, in a single pass for a set of products, **fourteen numeric measures** and
+**three echoes** of its calling context, from **posted (and optionally draft) invoice lines**. None
+of the seventeen is ever stored.
 
 ### 18.1 Inputs
 
@@ -2401,11 +2503,23 @@ expected_margin_rate = 80.00 × 100 ÷ 800.00 = 10.00
 
 ### 18.6 Grouping
 
-The fifteen measures can be summed in grouped lists even though they are not stored. The
-aggregation is performed by computing the measures for every record of every group and summing
-them in memory, rather than by asking the database. A rebuild that refuses to aggregate
-non-stored measures will lose the grouped view; a rebuild that tries to push the aggregation into
-the database will get different numbers, because the rates are all computed per product.
+Thirteen of the fourteen measures can be summed in grouped lists even though they are not stored:
+the turnover, the average sale unit price, the two invoiced quantities, the two gaps, the total
+cost, the expected sale, the normal cost, the two margins and the two margin rates. The fourteenth,
+the average **purchase** unit price, carries no such aggregation and cannot be summed. The three
+context echoes — the range start, the range end and the invoice-state filter — are not measures and
+are never aggregated.
+
+The aggregation is performed by computing the measures for every record of every group and summing
+them in memory, rather than by asking the database. A rebuild that refuses to aggregate non-stored
+measures will lose the grouped view; a rebuild that tries to push the aggregation into the database
+will get different numbers, because the rates are all computed per product.
+
+Two of the summable measures are summed although summing them is not meaningful: adding the average
+sale unit prices of two products, or adding two margin **rates**, produces a number with no business
+meaning. The behaviour is reproduced because the grouped list shows it; a rebuild that prefers to
+show an average or a blank in those two columns changes an observable value and must do so
+deliberately. Recorded as a **compatibility finding**.
 
 ---
 
@@ -2483,7 +2597,7 @@ list of rows, one per variant, computed the same way.
 |---|---|
 | On-screen table | Rendered from the same values. |
 | Printable document | A page per the standard layout; the table with one column per quantity. |
-| Comma-separated values export | Header row: "Product", "UOM", then one column per quantity labelled *Quantity (q UoM)*. One data row per product, and per variant when a template has several. |
+| Comma-separated values export | Header row: `Product`, then `UOM`, then one column per quantity labelled `Quantity (q UoM)` where *q* is that quantity. All four strings are reproduced exactly, shortened forms included, because integrations read them. One data row per product, and per variant when a template has several. |
 | Spreadsheet export | The same rows, with column widths sized to the longest cell. |
 
 The export flattens the nesting: a template with variants contributes **only its variant rows**,
@@ -2557,3 +2671,56 @@ minimum quantities. Section 9.3, property 7.
 A mis-configured price list produces a number. The only protections are write-time: the recursion
 guard, the margin ordering constraint, the date range constraint and the target consistency
 constraints. See [`business-rules.md`](business-rules.md).
+
+---
+
+## 22. Reconciliation notes
+
+Two independently written descriptions of these computations were merged into this file. Where they
+disagreed, the platform's behaviour decided. Each resolution is recorded here.
+
+1. **Where the shared primitives are specified.** One description restated the rounding operations,
+   the quantity conversion, the price conversion and the currency conversion in full; the other
+   linked to the domains that own them. Both are needed: a reader must be able to check an example
+   without leaving the page, and a rebuild must implement each primitive **once**. Section 1 names
+   every primitive with the exact rounding it applies and links to its owning domain, and each
+   worked example carries the intermediate value the primitive produces, so no arithmetic is hidden
+   behind a link. The owning domains remain
+   [units of measure and packaging](../units-of-measure-and-packaging/calculations.md) and
+   [multi-currency](../multi-currency/).
+
+2. **The order of the three operations on a purchase line.** One description gave tax correction,
+   then currency conversion, then unit conversion for the branch with a selected offer, and the
+   reverse for the cost fallback; the other gave one order for both. The two orders really do
+   differ, and section 15.7 states each of them, with the note that exact arithmetic makes them
+   agree and that a rebuild should still follow the stated orders so that last-digit comparisons
+   match.
+
+3. **The direction of the timesheet cost conversion.** One description called it a price conversion.
+   It is a **quantity** conversion, which is the wrong direction for an amount per unit of time and
+   which rounds. Section 17.6 records it as observed and marks it a compatibility finding.
+
+4. **The currency of the vendor ranking.** One description said the ranking compares discounted
+   prices; the other said it compares them converted into the company currency. Both are needed and
+   they are not the same number: section 15.4 converts, unrounded, for the **ranking**, while
+   section 15.11 uses the unconverted discounted price for the **displayed estimate**. The
+   difference is observable whenever two vendors quote in different currencies.
+
+5. **The unit recorded by vendor price learning.** One description copied the unit from the offer
+   the line had selected; the other from the line. The line's unit is written, and only when the
+   line had selected an offer; the vendor's product name and code come from the offer. Section 15.10
+   states all three.
+
+6. **How many product margin measures there are, and which can be summed.** Both descriptions said
+   "fifteen measures, all summable". There are fourteen numeric measures plus three echoes of the
+   calling context, and thirteen of the fourteen can be summed. Sections 18 and 18.6 state the
+   corrected counts and name the exception.
+
+7. **The rounding of the currency conversion inside the raw price reader.** One description said
+   every conversion in this domain is unrounded. The reader's own conversion **rounds**; the engine
+   avoids it by calling the reader without a currency and converting afterwards itself. Sections
+   16.1 and 21.2 state both halves, because a rebuild that rounds twice drifts.
+
+8. **The price grid export header.** One description reproduced the shortened column headers as the
+   platform emits them; the other expanded them into words. Export headers cross a system boundary
+   and are contractual: section 20.3 reproduces them exactly, in code font.

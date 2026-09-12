@@ -21,7 +21,9 @@ Every operation below is invoked on a set of records unless it is marked "model 
 | `get_tickets_access_hash` | one event, a list of registration identifiers | the keyed digest of the pair | none | none |
 | `get_kiosk_url` | one event | the address of the registration desk screen | none | none |
 | `toggle_website_menu`, `toggle_booth_menu`, `toggle_exhibitor_menu`, `toggle_website_track`, `toggle_website_track_proposal` | the events, a boolean | none | writes the matching switch, which creates or deletes the matching menu entries | none |
-| `action_mass_mailing_attendees`, `action_invite_contacts`, `action_mass_mailing_track_speakers` | the events | a screen description opening a prepared mailing | none | none |
+| `action_invite_contacts` | the events | a screen description titled "Mass Mail Invitation" opening a mailing prepared on Contact, subject pre-filled as `Event: <event name>`, no default selection | none | none |
+| `action_mass_mailing_attendees` | the events | a screen description titled "Mass Mail Attendees" opening a mailing prepared on Event Registration, subject pre-filled as `Event: <event name>`, default selection restricted to the attendees of those events whose state is neither `cancel` nor `draft` | none | none |
+| `action_mass_mailing_track_speakers` | the events | a screen description opening a mailing prepared on Event Track, subject pre-filled as `Event: <event name>`, default selection restricted to the talks of those events whose stage is not a cancelling stage; the screen title is "Mass Mail Attendees", which is a **compatibility finding** recorded in [workflows.md](workflows.md#28-send-a-mass-mailing-to-attendees) | none | none |
 | `get_slot_tickets_availability_pos` | one event, a list of `(slot identifier, ticket identifier)` pairs | one availability per pair | none | none |
 
 ### 1.2 On Event Registration
@@ -324,3 +326,7 @@ Over Event Registration Answer: a list of the answers with the question, the att
    4 of this file.
 2. **Identifiers.** Operation names and route paths are reproduced exactly; the fields they read and
    write are named by their storage names.
+3. **Prepared mailings.** The three operations that open a prepared mailing were listed together
+   without their defaults. They are now one row each, with the screen title, the entity the mailing
+   is prepared on, the pre-filled subject and the default selection.
+

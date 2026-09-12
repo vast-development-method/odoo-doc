@@ -28,6 +28,12 @@ The domain is delivered as a core package plus bridges. Each bridge only adds be
 | Quizzes on Tracks | Quizzes on talks, points, the visitor link fields and the community leaderboard. |
 | Quiz on Live Event Tracks | Shows the quiz invitation inside the next-talk suggestion of a live talk. |
 | Events Lead Generation | Turning attendees into leads, with rules, triggers and batch regeneration. |
+| Event Lead Generation with Sales | Makes the "Create" basis of a lead rule visible, so that per-order rules can be chosen, and groups the registrations of one sales order into a single lead instead of grouping them by creation moment. |
+| Website Event Lead Generation | Makes the "Create" basis of a lead rule visible on the website flows, appends the registration questions and their answers to the lead description, and copies the site visitor and the language of that visitor onto the lead. |
+| Mass Mailing on Attendees | Adds the "Invite" and "Contact Attendees" buttons on an event, prepares a mailing on Event Registration restricted to the attendees of that event, and declares Event Registration a mailing target whose default selection excludes the `draft` and `cancel` attendees. |
+| Event Attendees Text Message Marketing | Opens the same two prepared mailings on the combined screen that offers both electronic mail and text message channels. |
+| Mass Mailing on Talk Speakers | Adds the "Contact Speakers" button on an event, prepares a mailing on Event Track restricted to the talks of that event, and declares Event Track a mailing target whose default selection excludes the talks in a cancelled stage. |
+| Talk Speakers Text Message Marketing | Opens the prepared speaker mailing on the combined screen that offers both electronic mail and text message channels. |
 | Spreadsheet dashboard for events | A shipped analysis dashboard for events, restricted to the Event Administrator group. |
 
 ## 2. Settings shown on the configuration screen
@@ -337,3 +343,10 @@ A replacement needs the following before the domain can be used at all:
    Registration, Event Sponsor Type and Event Track Visitor.
 3. **The lead-generation job.** Its label is given without the abbreviation version M used, together
    with its external identifier `event_crm.ir_cron_generate_leads`, which is the contractual string.
+4. **Capability packages.** Neither version listed the six bridge packages that connect this domain
+   to the mass-mailing capability and to the lead-generation capability of an order or of the public
+   site. They are in the scope of this folder and are now in the table of section 1; the behaviour
+   each of them adds is specified in
+   [`workflows.md`](workflows.md#28-send-a-mass-mailing-to-attendees) and in
+   [`workflows.md`](workflows.md#19-generate-leads-from-attendees).
+

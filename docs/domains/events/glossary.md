@@ -28,6 +28,15 @@ is one of the choices offered by a selection question. A **recorded answer** (Ev
 Answer) is what one attendee actually answered to one question, either a chosen suggestion or a
 typed text.
 
+**Answer breakdown analysis.** The reporting screen over Event Registration Answer, opened on
+pivot and graph, that counts the recorded answers per question and per suggested answer, so that an
+organiser can read how the attendees answered each registration question. It is described in
+[`interfaces.md`](interfaces.md).
+
+**Attendance.** The fact that an attendee physically turned up. It is recorded by moving the
+registration to state `done`, which stamps the closing moment in `date_closed` and logs a note. The
+operation that records it is the badge scan of the registration desk.
+
 **Attendee.** The person who occupies a seat. The record that represents the seat is the
 Registration; the attendee name, electronic mail address, telephone and company name are fields of
 that record and are not necessarily those of the contact who booked it.
@@ -107,6 +116,11 @@ catalogue, a programme and a public page.
 **Event configurator.** The dialogue that opens when a ticket product is put on a sales order line.
 It asks for the event, the slot when the event uses slots, and the ticket.
 
+**Event stage.** One position of the ordered pipeline an event travels through. A stage carries a
+sequence, a description, a folding marker for the pipeline view and an ending marker. Stages are
+free master data: an organisation may rename them, reorder them and add its own. See
+[`state-machines.md`](state-machines.md).
+
 **Event template.** A reusable bundle of defaults — seat limitation, time zone, tickets, booths,
 communications, questions, tags, note, ticket instructions and website switches — applied to an
 event when its template link is set or changed. Applying a template never destroys anything that is
@@ -125,6 +139,16 @@ rather than once per attendee arrival. Its trigger is one of "before the event s
 event started", "after the event ended" or "before the event ends". On a multi-slot event it fires
 once per slot.
 
+**Installable event application.** The public event site packaged so that a visitor can add it to
+the home screen of a device. It is made of an application name, an application icon derived from
+the site icon, a manifest, a background worker and an offline page. See
+[`tracks-and-agenda.md`](tracks-and-agenda.md).
+
+**Karma.** The reputation points a site visitor accumulates in the community capability of the
+platform. Quiz points earned on a talk are added to the karma of the reader when that capability is
+present; the mechanism itself belongs to
+[Learning, surveys and gamification](../learning-surveys-and-gamification/README.md).
+
 **Key talk.** A talk flagged as always wish-listed: every attendee has a reminder on it unless they
 explicitly opt out. The opt-out is stored separately from the ordinary wish-list flag, because a key
 talk cannot simply be removed from the list.
@@ -137,17 +161,21 @@ the [Customer relationship management](../customer-relationship-management/READM
 domain owns the rules that create and update it. Also called an **opportunity** when its type is
 `opportunity`.
 
+**Lead request.** A background job ticket created when an administrator asks to regenerate the leads
+of an event that has too many attendees to process in one pass. At most one exists per event at a
+time.
+
 **Lead-generation rule.** A rule that turns attendees into leads: a creation basis (one lead per
 attendee, or one lead per order), a trigger (at creation, at registration, at attendance), optional
 filters on the event, the event templates, the company and a stored condition, and the default
 values written on the produced lead.
 
-**Lead request.** A background job ticket created when an administrator asks to regenerate the leads
-of an event that has too many attendees to process in one pass. At most one exists per event at a
-time.
-
 **Leaderboard.** The public ranking of site visitors by the quiz points they collected across the
 talks of one event, ordered by points descending then by visitor identifier ascending.
+
+**Live talk.** A talk whose start has passed and whose end has not, and which carries a video
+address. While a talk is live the public page shows the video and, when the video is not marked as
+a recording, the accompanying chat. See **Replay**.
 
 **Multi-slot event.** An event that repeats in several dated time slots. The seat maximum, the ticket
 maximum and the communications then apply per slot, and every registration must name a slot.
@@ -160,6 +188,11 @@ communication and is printed in the footer of the full page ticket.
 
 **Participant.** A reader with a registration in state `open` or `done` on an event. A participant
 always sees the event in the public lists, whatever its visibility setting.
+
+**Per-event menu.** The tree of website menu entries created for one event when its website
+switch is turned on: the introduction page, the registration page, the talk pages, the booth page,
+the exhibitor page and the community page, each one an entry of Website Event Menu tied to the page
+it opens.
 
 **Per-order limit.** The largest number of one ticket a single order may contain. Zero switches the
 rule off; the value may never exceed the seat maximum of the ticket, nor the absolute ceiling of
@@ -190,6 +223,10 @@ badges are printed and attendance is recorded. Its four-state life cycle is in
 **Registration desk.** The place, and the screen, where badges are scanned and attendees are marked
 as having attended. The lowest access group of the domain is named after it.
 
+**Replay.** A talk whose video is marked as a recording rather than a broadcast. A replay hides
+the live-only elements of the public talk page, in particular the chat, and it is never counted as
+live in the grouping of the talk list.
+
 **Reserved seats.** The number of active registrations of a scope in state `open`. Together with the
 used seats they make the taken seats.
 
@@ -197,14 +234,27 @@ used seats they make the taken seats.
 order lines to show how many seats were sold, at which price, by whom and to whom. Its two measures
 are per seat and expressed in the company currency.
 
+**Ribbon style.** The visual style attached to a sponsorship level and shown on the sponsor cards of
+the public exhibitor list. It is a presentation attribute only and has no effect on any
+calculation.
+
 **Sale status.** The payment situation of a seat: not sold, sold or free. It is derived from the
 order that carries the seat and never set by hand.
 
 **Seat.** The unit of capacity. One registration occupies one seat, and only while it is active and
 in state `open` or `done`.
 
+**Service tracking.** The marker on a product that says what selling that product creates. This
+domain adds two values to it: the event value, which makes the product usable as a ticket product,
+and the booth value, which makes it usable as a booth category product. The marker itself belongs to
+[Products and catalog](../products-and-catalog/README.md).
+
 **Session.** An alternative word for a **talk**: one item of the programme. This folder says talk,
 and the entity is Event Track.
+
+**Signed access address.** A public address that carries a keyed digest of the records it exposes,
+so that an attendee can fetch a badge or a ticket without an account and without being able to
+reach the documents of anybody else. The digest is produced by `get_tickets_access_hash`.
 
 **Slot.** One dated occurrence of a multi-slot event, carrying a calendar date, a start hour and an
 end hour expressed as fractional hours in the display time zone, and its own seat counters.
@@ -267,6 +317,8 @@ quiz result.
 
 ---
 
+---
+
 ## Vocabularies reconciled
 
 The two source versions of this folder used different words for the same records. The consolidated
@@ -298,3 +350,19 @@ here so that either reader finds the entry.
 | Question Suggested Answer | Event Question Answer | `event.question.answer` |
 | Registration Answer | Event Registration Answer | `event.registration.answer` |
 | Revenue Analysis | Event Sales Report | `event.sale.report` |
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** Neither version carried a glossary file; both reading orders announced one. Every
+   term defined above is drawn from the vocabulary the two versions actually used, so that a reader
+   arriving from either one finds the entry under the word that version used.
+2. **Two vocabularies.** Where the versions disagreed on the readable name of a record, the table
+   above maps the wording of version P onto the full name used throughout this folder, and the
+   entries **Session** and **Stand** are cross-references so that the alphabetical list works from
+   either vocabulary.
+3. **Identifiers.** Where a term corresponds to a stored field or a stored value, the identifier is
+   given in code font next to the definition and its full name is in
+   [`entities.md`](entities.md).
+

@@ -489,7 +489,7 @@ Changing the customer on a sales order rewrites the contact of every registratio
 
 ## 4.7 Desk check-in contract
 
-The operation `register_attendee(barcode, event)` searches the first registration with that exact barcode and returns a summary plus a status:
+The operation `register_attendee(barcode, event)` searches the first registration with that exact barcode and returns a summary plus a status. The situations are tested in the order of the rows and the first match decides:
 
 | Situation | Status returned |
 |---|---|
@@ -497,11 +497,13 @@ The operation `register_attendee(barcode, event)` searches the first registratio
 | The registration is cancelled | `canceled_registration` |
 | The registration is unconfirmed (`draft`) | `unconfirmed_registration` |
 | The event of the registration is finished | `not_ongoing_event` |
-| A specific event was requested and the registration belongs to another event | `need_manual_confirmation` |
 | The registration is already attended (`done`) | `already_registered` |
+| A specific event was requested and the registration belongs to another event | `need_manual_confirmation` |
 | Otherwise | the registration is set to `done` and `confirmed_registration` is returned |
 
-The summary contains the registration identifier, the attendee name, the contact, the slot display name, the ticket name, the event identifier and display name, the display text of every selection answer, the company name, the badge format, the attendance date formatted short, and whether that attendance date falls on the current day in the event time zone. With the product bridge it also contains the sale status, its readable label, and a flag "has to pay" that is true when the sale status is `to_pay`.
+Because the attendance test precedes the event test, an attendee who has already been scanned is reported as `already_registered` even when the desk is opened for a different event.
+
+The `invalid_ticket` answer carries no summary, because there is no registration to summarise; it carries that single word under the key `error` while every other answer carries its word under the key `status`. The summary contains the registration identifier, the attendee name, the contact, the slot display name, the ticket name, the event identifier and display name, the display text of every selection answer, the company name, the badge format, the attendance date formatted short, and whether that attendance date falls on the current day in the event time zone. With the product bridge it also contains the sale status, its readable label, and a flag "has to pay" that is true when the sale status is `to_pay`.
 
 ## 4.8 Website registration
 
@@ -1262,7 +1264,7 @@ value = order line total (including tax, or excluding tax
         ÷ (order currency rate, replaced by 1.0 when it is
            zero or absent)
         ÷ order line quantity                                otherwise
-```formula
+```
 
 Dividing by the order currency rate expresses the amount in the company currency of the order. The view is restricted per company by the record rule "Event Sales Report multi-company".
 
@@ -1354,7 +1356,7 @@ These two entities turn attendees into leads. The Lead itself belongs to the [Cu
 |---|---|---|---|---|---|---|
 | `name` | Rule Name | text (translatable) | yes | none | stored | Rule label. |
 | `active` | Active | boolean | yes | true | stored | Inactive rules never run. |
-| `lead_creation_basis` | Create | selection | yes | `attendee` | stored | Values: `attendee` (Per Attendee, one lead per seat) and `order` (Per Order, one lead per batch of seats). |
+| `lead_creation_basis` | Create | selection | yes | `attendee` | stored | Values: `attendee` (Per Attendee, one lead per seat) and `order` (Per Order, one lead per batch of seats). The field is hidden on the rule form and in the rule list unless the Event Lead Generation with Sales package or the Website Event Lead Generation package is installed; with neither of them, every rule is per attendee. |
 | `lead_creation_trigger` | When | selection | yes | `create` | stored | Values: `create` (Attendees are created), `confirm` (Attendees are registered), `done` (Attendees attended). |
 | `event_type_ids` | Event Templates | many_to_many to Event Template | no | none | stored | Restrict to attendees of events built on these templates. Empty means no restriction. |
 | `event_id` | Event | many_to_one to Event | no | none | stored | Restrict to attendees of this event. Only events of the rule company (or of no company) may be chosen. Empty means no restriction. |
@@ -1414,5 +1416,8 @@ The batch size is 200 attendees and at most 100 requests are processed per run o
    per slot and that the event-level available figure uses the maximum multiplied by the number of
    slots. The source confirms both statements, and the seat counter section of
    [`calculations.md`](calculations.md#1-seat-counters) carries the worked example.
+5. **The badge-scan contract.** Section 4.7 now lists the seven outcomes in the order in which the
+   tests are evaluated and states that the `invalid_ticket` answer carries no summary. Both versions
+   had the event-mismatch test before the already-attended test; the corrected order is shared with
+   [`state-machines.md`](state-machines.md) and [`workflows.md`](workflows.md).
 
-```

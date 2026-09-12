@@ -375,7 +375,7 @@ Behavioural scenarios a replacement must pass, written as Given / When / Then wi
 ### EV-AC-085 An unknown barcode
 
 **When** the desk scans a barcode that no registration carries
-**Then** the outcome is `invalid_ticket` and nothing is written.
+**Then** the outcome is `invalid_ticket`, the answer carries that word alone and no registration summary, and nothing is written.
 
 ### EV-AC-086 A cancelled attendee
 
@@ -410,9 +410,15 @@ Behavioural scenarios a replacement must pass, written as Given / When / Then wi
 **When** the same badge is scanned again
 **Then** the outcome is `already_registered` and nothing changes.
 
-### EV-AC-092 The summary returned by a scan
+### EV-AC-092 An attended badge scanned at the desk of another event
 
-**When** any scan returns
+**Given** the desk opened for event A, and an attendee of event B already in state `done`, event B not finished
+**When** the badge of that attendee is scanned
+**Then** the outcome is `already_registered`, not `need_manual_confirmation`, and nothing is written, because the attendance test is evaluated before the event test.
+
+### EV-AC-093 The summary returned by a scan
+
+**When** any scan other than `invalid_ticket` returns
 **Then** the answer carries the registration identifier, the attendee name, the contact, the slot display name, the ticket name, the event identifier and display name, the display texts of the selection answers, the company name, the badge layout, the attendance date in short format and whether it falls on the current day in the display time zone; with the product bridge it also carries the sale status, its label and the "has to pay" flag.
 
 ---
@@ -1509,3 +1515,8 @@ custom-field                    = custom-value
    source, including their irregular spacing.
 3. **Identifiers.** The fields named in the scenarios use the storage names the database carries, so
    that a scenario can be executed against a replacement without a translation step.
+4. **Two scenarios added.** `EV-AC-092` was added for the badge scanned at the desk of another event
+   when the attendee is already attended, because the order of the two tests is observable and
+   neither version had a scenario for it; the former `EV-AC-092`, which covers the summary returned
+   by a scan, is now `EV-AC-093`. No other identifier moved.
+

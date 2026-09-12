@@ -3,7 +3,7 @@
     "name": "General Ledger calculations",
     "description": "Every formula, algorithm, rounding rule and worked example of the general ledger domain, in a structured form a rebuild can test against: the rounding conventions, the balance and its two derived columns, the foreign-currency amounts, the balance invariant, the entry totals, the lock dates and the accounting date rule, the whole numbering grammar and its assignment, the inalterability hash chain, the reconciliation algorithm with its exchange differences, the fiscal year, the opening entry, the partner ledger figures, the account code generation, the dashboard figures of a liquidity journal, the automatic transfers, and the end-to-end walkthrough that ties them together.",
     "domain": "general-ledger",
-    "record_count": 91,
+    "record_count": 93,
     "authored_from": "docs/domains/general-ledger/calculations.md, with the ledger effects of docs/domains/general-ledger/accounting-effects.md and the rule identifiers of docs/domains/general-ledger/business-rules.md"
   },
   "records": [
@@ -4009,6 +4009,135 @@
     },
     {
       "identifier": "general-ledger-040",
+      "name": "Rendering one hashed value as text",
+      "document": "docs/domains/general-ledger/calculations.md#rendering-each-value-as-text",
+      "purpose": "Turns the value of each field that enters the inalterability hash into the exact text that is placed in the mapping, so that two independent implementations build character-for-character the same input string and therefore the same digest.",
+      "operands": [
+        {
+          "name": "value of the field being rendered",
+          "unit_or_currency": "the company currency for a monetary field, a whole identifier for a link field, a date or a text otherwise",
+          "source": "one of the hashed fields: the number, the accounting date, the journal and the company of the entry, and the label, the debit, the credit, the account and the counterpart of each item",
+          "constraints": "may be empty, in which case it is rendered as the word False"
+        },
+        {
+          "name": "kind of the field",
+          "unit_or_currency": "one of link, monetary, other",
+          "source": "the definition of the field in the entity documents",
+          "constraints": "exactly one of the three kinds applies to each hashed field"
+        },
+        {
+          "name": "number of decimal places of the currency of the record",
+          "unit_or_currency": "a count of decimal places",
+          "source": "the number of decimals derived from the rounding step of the currency of the record",
+          "constraints": "two for a currency whose rounding step is one hundredth, zero for a currency with no subdivision"
+        }
+      ],
+      "preconditions": [
+        {
+          "condition": "The field is one of the fields that enter the hash at the current hash version: on the entry the number, the accounting date, the journal and the company; on each item the label, the debit, the credit, the account and the counterpart.",
+          "otherwise": "The field is not rendered at all and takes no part in the digest; an earlier hash version omitted the two label fields, and the verification retries the older versions when the current one does not match."
+        },
+        {
+          "condition": "The currency of the record is known, so that the number of decimal places of a monetary field is determined.",
+          "otherwise": "The number of decimals cannot be fixed and the digest cannot be reproduced; the company currency of the entry is the currency used for the debit and the credit of every item."
+        }
+      ],
+      "procedure": [
+        "Take the value of the field and decide which of the three kinds it belongs to.",
+        "Render a link field as the decimal identifier of the record it points at, and as the word False when the link is empty, because the identifier of an empty link is the boolean false.",
+        "Render a monetary field with exactly the number of decimal places of the currency of the record, with no thousands separator and with a dot as the decimal separator.",
+        "Render every other field with the ordinary textual representation of its value: a date as four digits for the year, a hyphen, two digits for the month, a hyphen and two digits for the day; a text as itself; an empty value as the word False.",
+        "Place the rendered text as the value of the key of that field in the mapping that is later serialised and hashed."
+      ],
+      "formula": "rendered_text( link field )      = the decimal identifier of the target record, or \"False\" when the link is empty\nrendered_text( monetary field )  = the amount written with exactly ( the number of decimals of the currency of the record ) decimal places, no thousands separator, a dot as the decimal separator\nrendered_text( any other field ) = the ordinary textual representation of the value: a date as \"YYYY-MM-DD\", a text as itself, an empty value as \"False\"",
+      "rounding": {
+        "what": "The monetary fields of the item, that is the debit and the credit.",
+        "precision": "Exactly the number of decimal places of the currency of the record, so an amount of one thousand in a currency of two decimals is written as the text 1000.00.",
+        "method": "Half away from zero, applied earlier when the amount was stored; the rendering itself does not round, it only fixes the number of decimal places written.",
+        "step": "At rendering time, after the amounts have been stored and before the mapping is serialised."
+      },
+      "result": {
+        "name": "rendered text of one field value",
+        "unit_or_currency": "text",
+        "stored_or_displayed": "Not stored on its own: it is the value of one key of the mapping whose serialisation is hashed and whose digest is stored on the entry."
+      },
+      "edge_cases": [
+        {
+          "case": "The link is empty, for example an item with no counterpart.",
+          "outcome": "The rendered text is the word False, not an empty text and not a zero."
+        },
+        {
+          "case": "A monetary amount of zero in a currency of two decimals.",
+          "outcome": "The rendered text is 0.00, with both decimal places written."
+        },
+        {
+          "case": "A monetary amount of one thousand in a currency of two decimals.",
+          "outcome": "The rendered text is 1000.00; no thousands separator is written and the decimal separator is a dot."
+        },
+        {
+          "case": "The currency of the record has no subdivision, so its rounding step is one.",
+          "outcome": "The amount is rendered with no decimal places at all."
+        },
+        {
+          "case": "A value of another kind is empty, for example a label that was never filled.",
+          "outcome": "The rendered text is the word False, exactly as for an empty link."
+        },
+        {
+          "case": "A character outside the basic Latin alphabet appears in a label.",
+          "outcome": "It survives the rendering unchanged and is escaped as an escape sequence when the mapping is serialised."
+        }
+      ],
+      "worked_examples": [
+        {
+          "description": "The nine values of the first entry of the worked hash example, in a company whose currency has two decimals",
+          "inputs": {
+            "entry_number": "MISC/2026/03/0001",
+            "entry_date": "5 March 2026",
+            "entry_journal_identifier": 3,
+            "entry_company_identifier": 1,
+            "item_51": {
+              "label": "Rent",
+              "debit": 1000.0,
+              "credit": 0.0,
+              "account_identifier": 12,
+              "partner_identifier": null
+            },
+            "item_52": {
+              "label": "Rent",
+              "debit": 0.0,
+              "credit": 1000.0,
+              "account_identifier": 34,
+              "partner_identifier": null
+            },
+            "decimals_of_the_company_currency": 2
+          },
+          "expected_outputs": {
+            "name": "MISC/2026/03/0001",
+            "date": "2026-03-05",
+            "journal_id": "3",
+            "company_id": "1",
+            "line_51_name": "Rent",
+            "line_51_debit": "1000.00",
+            "line_51_credit": "0.00",
+            "line_51_account_id": "12",
+            "line_51_partner_id": "False",
+            "line_52_name": "Rent",
+            "line_52_debit": "0.00",
+            "line_52_credit": "1000.00",
+            "line_52_account_id": "34",
+            "line_52_partner_id": "False"
+          },
+          "narrative": "The two links to the journal and to the company become the decimal identifiers 3 and 1; the accounting date becomes the text 2026-03-05; the debit of one thousand becomes 1000.00 and the credit of zero becomes 0.00, both with exactly two decimal places and no thousands separator; the two empty counterpart links become the word False; the labels and the number are rendered as themselves."
+        }
+      ],
+      "related_rules": [
+        "I15",
+        "I16",
+        "business-rules.md#10-hashing-rules"
+      ]
+    },
+    {
+      "identifier": "general-ledger-041",
       "name": "The inalterability hash of a secured entry",
       "document": "docs/domains/general-ledger/calculations.md#building-the-input-string",
       "purpose": "Binds the hash of the previous secured entry of the same chain to the exact content of this entry, so that any later modification of a hashed field breaks the verification and the archive is provably unaltered.",
@@ -4160,7 +4289,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-041",
+      "identifier": "general-ledger-042",
       "name": "Verifying the hash chain of a journal",
       "document": "docs/domains/general-ledger/calculations.md#verification",
       "purpose": "Walks the secured entries of each journal, recomputes their hashes and reports, per numbering prefix, the range of entries that verify and the first entry that does not.",
@@ -4265,7 +4394,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-042",
+      "identifier": "general-ledger-043",
       "name": "The residual amounts and the reconciled flag of a journal item",
       "document": "docs/domains/general-ledger/calculations.md#181-residual-amounts",
       "purpose": "Gives what is still open on an item after everything already matched against it, in both the company currency and the currency of the item, and decides whether the item counts as reconciled.",
@@ -4393,7 +4522,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-043",
+      "identifier": "general-ledger-044",
       "name": "Building the reconciliation plan",
       "document": "docs/domains/general-ledger/calculations.md#183-building-the-plan",
       "purpose": "Turns a reconciliation request into the ordered tree of nodes that the pairing loop walks, so that items meet in a defined order and items of two currencies are never paired inside one node.",
@@ -4547,7 +4676,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-044",
+      "identifier": "general-ledger-045",
       "name": "The accounting rate of a journal item",
       "document": "docs/domains/general-ledger/calculations.md#184-the-available-residuals-of-one-item-seen-from-a-counterpart-currency",
       "purpose": "Gives the rate implied by the item itself, which is the rate at which the item is willing to be matched in its own currency and the rate an invoice adopts when it is matched against a payment.",
@@ -4633,7 +4762,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-045",
+      "identifier": "general-ledger-046",
       "name": "The rate to the counterpart currency in a reconciliation",
       "document": "docs/domains/general-ledger/calculations.md#184-the-available-residuals-of-one-item-seen-from-a-counterpart-currency",
       "purpose": "Chooses the rate at which an item kept in the company currency is offered in the currency of its counterpart, so that an invoice can be matched in the currency of the payment at the rate of that payment.",
@@ -4728,7 +4857,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-046",
+      "identifier": "general-ledger-047",
       "name": "The available residuals of one item seen from a counterpart currency",
       "document": "docs/domains/general-ledger/calculations.md#184-the-available-residuals-of-one-item-seen-from-a-counterpart-currency",
       "purpose": "Publishes, for one item, the residual it can offer in each currency together with the rate that reaches that currency, which is what allows the currency of the match to be chosen before any amount is computed.",
@@ -4860,7 +4989,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-047",
+      "identifier": "general-ledger-048",
       "name": "Choosing the currency in which a match is made",
       "document": "docs/domains/general-ledger/calculations.md#185-choosing-the-currency-of-the-match",
       "purpose": "Picks the currency in which two items will be matched, preferring a foreign currency that both sides can offer, so that a foreign-currency invoice and a foreign-currency payment settle each other exactly in that currency.",
@@ -4972,7 +5101,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-048",
+      "identifier": "general-ledger-049",
       "name": "The matched amount and the fully-matched flags of one partial match",
       "document": "docs/domains/general-ledger/calculations.md#186-computing-one-partial-match",
       "purpose": "Determines how much of the two facing residuals is settled by one partial match and which of the two sides is thereby exhausted in the reconciliation currency.",
@@ -5071,7 +5200,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-049",
+      "identifier": "general-ledger-050",
       "name": "One partial match computed in the company currency",
       "document": "docs/domains/general-ledger/calculations.md#186-computing-one-partial-match",
       "purpose": "Computes the three amounts of a Partial Reconciliation when the match is made in the company currency, converting the matched amount into each item currency without ever exceeding what that item still has open.",
@@ -5178,7 +5307,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-050",
+      "identifier": "general-ledger-051",
       "name": "One partial match computed in a foreign currency",
       "document": "docs/domains/general-ledger/calculations.md#186-computing-one-partial-match",
       "purpose": "Computes the three amounts of a Partial Reconciliation when the match is made in a currency other than the company currency, converting each side back into the company currency at the inverse of its own rate so that the difference between the two rates surfaces as an exchange difference.",
@@ -5299,7 +5428,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-051",
+      "identifier": "general-ledger-052",
       "name": "The tolerance range around a matched amount converted back into the company currency",
       "document": "docs/domains/general-ledger/calculations.md#186-computing-one-partial-match",
       "purpose": "Computes the interval within which a company-currency conversion of the matched amount is indistinguishable from another, so that the rounding of the original amounts is not mistaken for a genuine exchange difference.",
@@ -5403,7 +5532,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-052",
+      "identifier": "general-ledger-053",
       "name": "Rounding-noise suppression in a foreign-currency match",
       "document": "docs/domains/general-ledger/calculations.md#186-computing-one-partial-match",
       "purpose": "Replaces the matched amount when the two sides differ only by the rounding of the original amounts, so that no exchange-difference entry is produced and no residual is left open for a difference that does not exist.",
@@ -5514,7 +5643,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-053",
+      "identifier": "general-ledger-054",
       "name": "Updating the residuals of two items after a partial match",
       "document": "docs/domains/general-ledger/calculations.md#updating-the-residuals",
       "purpose": "Reduces what each of the two matched items still has open, in both currencies, and decides when an item leaves the iteration.",
@@ -5636,7 +5765,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-054",
+      "identifier": "general-ledger-055",
       "name": "The stored amounts of a partial reconciliation",
       "document": "docs/domains/general-ledger/calculations.md#the-stored-match",
       "purpose": "States exactly what one match records, so that the residual of every item can be recomputed from the ledger alone and every match is always readable as three positive amounts.",
@@ -5741,7 +5870,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-055",
+      "identifier": "general-ledger-056",
       "name": "The pairing loop of a reconciliation node",
       "document": "docs/domains/general-ledger/calculations.md#187-the-pairing-loop",
       "purpose": "Walks the items of one node, pairing debits with credits in the node order until one of the two lists is exhausted, which is what produces the sequence of partial matches.",
@@ -5846,7 +5975,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-056",
+      "identifier": "general-ledger-057",
       "name": "The exchange difference when the match was made in the company currency",
       "document": "docs/domains/general-ledger/calculations.md#when-a-difference-is-produced",
       "purpose": "Computes the amount by which the foreign residual of an item must be corrected when the match settled the company-currency amounts in full but left something open in the currency of the item.",
@@ -5949,7 +6078,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-057",
+      "identifier": "general-ledger-058",
       "name": "The exchange difference when the match was made in a foreign currency",
       "document": "docs/domains/general-ledger/calculations.md#when-a-difference-is-produced",
       "purpose": "Computes the amount by which the company-currency residual of an item must be corrected when the match settled the foreign amounts in full, or partly, at a rate different from the rate at which the item was booked.",
@@ -6072,7 +6201,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-058",
+      "identifier": "general-ledger-059",
       "name": "The items of the exchange-difference entry",
       "document": "docs/domains/general-ledger/calculations.md#the-exchange-difference-entry",
       "purpose": "States the pair of items created for each corrected journal item, with their accounts, their sides, their amounts, their date and their matching, so that the exchange result is booked and the corrected item reaches a zero residual.",
@@ -6194,7 +6323,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-059",
+      "identifier": "general-ledger-060",
       "name": "Full-reconcile detection over a batch of matched items",
       "document": "docs/domains/general-ledger/calculations.md#detection",
       "purpose": "Decides which connected batches of matched items net to zero, so that each such batch receives one Full Reconciliation and the documents behind it can be reported as paid.",
@@ -6336,7 +6465,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-060",
+      "identifier": "general-ledger-061",
       "name": "The matching numbers of the connected components of matches",
       "document": "docs/domains/general-ledger/calculations.md#matching-numbers",
       "purpose": "Numbers the connected groups of matched items, so that each item carries a stable label identifying the group it settles with, whether or not that group has closed.",
@@ -6459,7 +6588,176 @@
       ]
     },
     {
-      "identifier": "general-ledger-061",
+      "identifier": "general-ledger-062",
+      "name": "The resolution of imported matching numbers at posting",
+      "document": "docs/domains/general-ledger/calculations.md#imported-matching-numbers",
+      "purpose": "Turns the matching labels carried by items loaded from outside into real matches, so that a ledger imported with its settlement history reaches the same residuals and the same Full Reconciliations as one built inside the system.",
+      "operands": [
+        {
+          "name": "imported matching number of an item",
+          "unit_or_currency": "a text beginning with the letter I",
+          "source": "the matching number written from outside the system on a Journal Item",
+          "constraints": "any write of a matching number that does not already begin with the letter I is rewritten as the letter I followed by the supplied text, unless the caller explicitly bypasses the rule"
+        },
+        {
+          "name": "account of each item carrying the number",
+          "unit_or_currency": "an Account",
+          "source": "the Journal Item",
+          "constraints": "the grouping is made on the pair of the number and the account, so the same imported number on two accounts makes two groups"
+        },
+        {
+          "name": "state of the entry of each item of a group",
+          "unit_or_currency": "one of draft, posted, cancelled",
+          "source": "the Journal Entry of each item",
+          "constraints": "every entry of the group must be posted before the group is resolved"
+        },
+        {
+          "name": "reconciliation flag of the account",
+          "unit_or_currency": "true or false",
+          "source": "the Account",
+          "constraints": "switched on when it is off, and the configuration change is logged"
+        },
+        {
+          "name": "balance and foreign amount of each item of the group",
+          "unit_or_currency": "company currency and item currency",
+          "source": "the Journal Items of the group",
+          "constraints": "they are what the reconciliation algorithm matches once the group is resolved"
+        }
+      ],
+      "preconditions": [
+        {
+          "condition": "The matching number begins with the letter I, which marks it as written from outside.",
+          "otherwise": "The number is a real one produced by the component numbering of the matches and is not resolved; it is the decimal identifier of a Full Reconciliation or the letter P followed by a component number."
+        },
+        {
+          "condition": "Every entry of the group formed by one imported number and one account is posted.",
+          "otherwise": "The group is left untouched, and the resolution is attempted again when the remaining entries of the group are posted."
+        },
+        {
+          "condition": "The items of the group carry no real match yet.",
+          "otherwise": "The write is refused with \"A temporary number can not be used in a real matching\", because a temporary number may not sit on an item that already participates in real matches."
+        }
+      ],
+      "procedure": [
+        "At posting, collect the distinct imported matching numbers found among the items being posted.",
+        "Group every item carrying one of those numbers by the pair of the number and the account, so that the same imported number used on two accounts forms two independent groups.",
+        "Take each group in turn and test whether every entry of the group is posted; leave the group untouched when at least one entry is still draft.",
+        "When the account of a resolvable group does not allow matching, switch the flag on and log that the configuration was changed.",
+        "Reconcile the items of the group with the reconciliation algorithm, with exchange differences and cash-basis entries suppressed.",
+        "Let the ordinary numbering of the matches replace the imported label: each item then carries the decimal identifier of the Full Reconciliation of its batch, or the letter P followed by its component number."
+      ],
+      "formula": "stored_matching_number = \"I\" + the supplied text          for every write that does not already begin with the letter I\ngroup( item )          = ( the imported matching number of the item , the account of the item )\nresolvable( group )    = every entry of the group is posted\nmatched amounts of a resolvable group = the amounts produced by the reconciliation algorithm on the items of the group, with exchange differences and cash-basis entries suppressed",
+      "rounding": {
+        "what": "Nothing is rounded by the resolution itself; the amounts of the matches it triggers are rounded by the reconciliation algorithm.",
+        "precision": "The matched amount carries the precision of the company currency, and the two currency amounts of a match the precision of the currency of their side.",
+        "method": "Half away from zero, applied by the reconciliation algorithm when it computes each partial match.",
+        "step": "No rounding step in the grouping and the resolution; rounding happens inside the matches that follow."
+      },
+      "result": {
+        "name": "the matches created for each resolvable group, and the real matching number that replaces the imported label",
+        "unit_or_currency": "Partial Reconciliations in the company currency and in the currency of each side, and one Full Reconciliation when the group nets to zero",
+        "stored_or_displayed": "Stored as the matches of the items and as the matching number of each item; the imported label disappears once the group is resolved."
+      },
+      "edge_cases": [
+        {
+          "case": "One entry of the group is still draft.",
+          "outcome": "No match is created for that group; the whole group waits until every one of its entries is posted."
+        },
+        {
+          "case": "The account of the group does not allow matching.",
+          "outcome": "The flag is switched on before the group is reconciled and the configuration change is logged."
+        },
+        {
+          "case": "The same imported number appears on two different accounts.",
+          "outcome": "Two groups are formed, one per account, and each is resolved on its own."
+        },
+        {
+          "case": "The group would produce an exchange difference.",
+          "outcome": "Exchange differences are suppressed during this reconciliation, and so are cash-basis entries."
+        },
+        {
+          "case": "An imported number is written on an item that already participates in real matches.",
+          "outcome": "Refused with \"A temporary number can not be used in a real matching\"."
+        },
+        {
+          "case": "A caller writes a matching number that does not begin with the letter I and does not bypass the rule.",
+          "outcome": "The stored value becomes the letter I followed by the supplied text, so that an imported label can never be confused with a real one."
+        },
+        {
+          "case": "The items of a resolvable group do not net to zero.",
+          "outcome": "The matches are still created and the items keep a residual; the group receives the letter P followed by its component number instead of a Full Reconciliation identifier."
+        }
+      ],
+      "worked_examples": [
+        {
+          "description": "Two imported items on the payable account 400000, both carrying the label written from outside as REF42 and both belonging to posted entries",
+          "inputs": {
+            "supplied_matching_number": "REF42",
+            "account": "400000 Suppliers, reconciliation not yet allowed",
+            "items": [
+              {
+                "balance": -1200.0,
+                "amount_currency": -1200.0,
+                "entry_state": "posted"
+              },
+              {
+                "balance": 1200.0,
+                "amount_currency": 1200.0,
+                "entry_state": "posted"
+              }
+            ],
+            "company_currency": "euro"
+          },
+          "expected_outputs": {
+            "stored_matching_number_before_resolution": "IREF42",
+            "groups": 1,
+            "reconciliation_flag_of_the_account": "switched on and the change logged",
+            "matched_amount": 1200.0,
+            "new_residual_of_each_item": 0.0,
+            "full_reconciliation_created": true,
+            "matching_number_after_resolution": "the decimal identifier of the Full Reconciliation"
+          },
+          "narrative": "The label supplied by the import is stored as the letter I followed by REF42. At posting the two items form one group, because they share that number and the account 400000. Both entries are posted, so the group is resolvable; the account did not allow matching, so the flag is switched on and the change is logged. The reconciliation algorithm matches the credit of 1 200.00 against the debit of 1 200.00 in the company currency, leaving a residual of 0.00 on each side, and the batch nets to zero, so one Full Reconciliation is created and both items carry its decimal identifier as their matching number in place of the imported label."
+        },
+        {
+          "description": "The same two items while the second entry is still draft",
+          "inputs": {
+            "supplied_matching_number": "REF42",
+            "account": "400000 Suppliers",
+            "items": [
+              {
+                "balance": -1200.0,
+                "amount_currency": -1200.0,
+                "entry_state": "posted"
+              },
+              {
+                "balance": 1200.0,
+                "amount_currency": 1200.0,
+                "entry_state": "draft"
+              }
+            ],
+            "company_currency": "euro"
+          },
+          "expected_outputs": {
+            "groups": 1,
+            "matches_created": 0,
+            "matched_amount": 0.0,
+            "residual_of_the_posted_item": -1200.0,
+            "matching_number_after_the_attempt": "IREF42"
+          },
+          "narrative": "The group is formed but is not resolvable, because one of its entries is still draft. No match is created, the posted item keeps its residual of minus 1 200.00 and both items keep the imported label until the draft entry is posted."
+        }
+      ],
+      "related_rules": [
+        "I11",
+        "I12",
+        "I13",
+        "I14",
+        "business-rules.md#12-reconciliation-rules"
+      ]
+    },
+    {
+      "identifier": "general-ledger-063",
       "name": "The fiscal year of a company containing a date",
       "document": "docs/domains/general-ledger/calculations.md#21-the-fiscal-year",
       "purpose": "Gives the first and the last day of the accounting year that contains a date, which is what the year-range numbering, the period boundaries and the year-end reports all rest on.",
@@ -6567,7 +6865,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-062",
+      "identifier": "general-ledger-064",
       "name": "The default values of a new opening entry",
       "document": "docs/domains/general-ledger/calculations.md#default-values-of-a-new-opening-entry",
       "purpose": "Fixes the journal, the reference and above all the date of the entry that carries the initial balance of every account, so that the opening balances sit just before the first day the company trades.",
@@ -6645,7 +6943,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-063",
+      "identifier": "general-ledger-065",
       "name": "The code of a created current-year-earnings account",
       "document": "docs/domains/general-ledger/calculations.md#the-balancing-account",
       "purpose": "Finds a free code for the account on which the opening entry is balanced, when the company has no account of the current-year-earnings type yet.",
@@ -6737,7 +7035,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-064",
+      "identifier": "general-ledger-066",
       "name": "Updating the opening entry and its balancing items",
       "document": "docs/domains/general-ledger/calculations.md#updating-the-entry",
       "purpose": "Applies a set of requested opening balances to the opening entry and keeps it balanced by adjusting the two items on the current-year-earnings account.",
@@ -6907,7 +7205,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-065",
+      "identifier": "general-ledger-067",
       "name": "The amount receivable of a partner",
       "document": "docs/domains/general-ledger/calculations.md#amount-receivable-and-amount-payable",
       "purpose": "Gives what a counterpart still owes the company, which is the figure shown on the partner ledger and the numerator of the days of sales outstanding.",
@@ -6982,7 +7280,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-066",
+      "identifier": "general-ledger-068",
       "name": "The amount payable of a partner",
       "document": "docs/domains/general-ledger/calculations.md#amount-receivable-and-amount-payable",
       "purpose": "Gives what the company still owes a counterpart, shown as a positive figure on the partner ledger.",
@@ -7059,7 +7357,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-067",
+      "identifier": "general-ledger-069",
       "name": "The total invoiced of a partner",
       "document": "docs/domains/general-ledger/calculations.md#total-invoiced",
       "purpose": "Gives the untaxed turnover recorded against a counterpart and everything below it in the counterpart hierarchy, which is the figure the partner form shows as the business done with that counterpart.",
@@ -7131,7 +7429,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-068",
+      "identifier": "general-ledger-070",
       "name": "The days of sales outstanding of a partner",
       "document": "docs/domains/general-ledger/calculations.md#days-of-sales-outstanding",
       "purpose": "Expresses what a counterpart still owes as a number of days of its own sales, which is the collection indicator shown on the partner.",
@@ -7225,7 +7523,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-069",
+      "identifier": "general-ledger-071",
       "name": "Generating an unused account code",
       "document": "docs/domains/general-ledger/calculations.md#24-account-code-generation",
       "purpose": "Finds a free code for a new account derived from an existing one, by increasing the digit run of the starting code and, when that is exhausted, by appending a copy marker.",
@@ -7342,7 +7640,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-070",
+      "identifier": "general-ledger-072",
       "name": "The balance of a liquidity journal that carries a foreign currency",
       "document": "docs/domains/general-ledger/calculations.md#balance-of-a-liquidity-journal",
       "purpose": "Gives the figure the accounting dashboard shows for a bank, cash or credit-card journal whose account is kept in a currency other than the company currency, which is the balance of the account expressed in that currency.",
@@ -7432,7 +7730,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-071",
+      "identifier": "general-ledger-073",
       "name": "The balance of a liquidity journal kept in the company currency",
       "document": "docs/domains/general-ledger/calculations.md#balance-of-a-liquidity-journal",
       "purpose": "Gives the figure the accounting dashboard shows for a bank, cash or credit-card journal whose account is kept in the company currency, which is the balance of the account in that currency.",
@@ -7514,7 +7812,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-072",
+      "identifier": "general-ledger-074",
       "name": "Whether a journal still has entries to secure",
       "document": "docs/domains/general-ledger/calculations.md#entries-to-hash",
       "purpose": "Tells the accounting dashboard whether a journal that secures its entries still holds an entry that has not been hashed, without walking the whole chain.",
@@ -7598,7 +7896,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-073",
+      "identifier": "general-ledger-075",
       "name": "The total amount of an automatic transfer computed from the percentage",
       "document": "docs/domains/general-ledger/calculations.md#share-of-each-item",
       "purpose": "Gives the amount that a chosen share of the selected items represents, which is the figure the accountant reads when preparing a cut-off or a transfer.",
@@ -7684,7 +7982,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-074",
+      "identifier": "general-ledger-076",
       "name": "The percentage of an automatic transfer computed from the total amount",
       "document": "docs/domains/general-ledger/calculations.md#share-of-each-item",
       "purpose": "Gives the share that a chosen amount represents of the selected items, which is the inverse view of the total amount and the value actually applied to every item of the transfer.",
@@ -7777,7 +8075,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-075",
+      "identifier": "general-ledger-077",
       "name": "The nature of the accrual account deduced from the sign of the selection",
       "document": "docs/domains/general-ledger/calculations.md#share-of-each-item",
       "purpose": "Decides whether an automatic transfer books its counterpart on a revenue accrual account or on an expense accrual account, from the sign of the amounts being transferred.",
@@ -7853,7 +8151,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-076",
+      "identifier": "general-ledger-078",
       "name": "The reported amounts of a change-of-period transfer",
       "document": "docs/domains/general-ledger/calculations.md#change-of-period--the-two-mirrored-entries",
       "purpose": "Computes, for each selected item, the share of its debit, of its credit and of its foreign amount that is carried into the other period by a cut-off.",
@@ -7962,7 +8260,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-077",
+      "identifier": "general-ledger-079",
       "name": "The items of the destination entry of a change of period",
       "document": "docs/domains/general-ledger/calculations.md#change-of-period--the-two-mirrored-entries",
       "purpose": "States the two items produced per source item in the entry dated at the chosen date, which is the entry that brings the deferred amount into the new period.",
@@ -8068,7 +8366,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-078",
+      "identifier": "general-ledger-080",
       "name": "The items of the cancelling entry of a change of period",
       "document": "docs/domains/general-ledger/calculations.md#change-of-period--the-two-mirrored-entries",
       "purpose": "States the two items produced per source item in the entry dated at the lock-safe equivalent of the source date, which is the entry that removes the deferred amount from the original period.",
@@ -8199,7 +8497,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-079",
+      "identifier": "general-ledger-081",
       "name": "The counterpart item of a change-of-account transfer",
       "document": "docs/domains/general-ledger/calculations.md#change-of-account",
       "purpose": "Computes, per counterpart and per currency, the single item booked on the destination account of a transfer, together with its analytic distribution.",
@@ -8315,7 +8613,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-080",
+      "identifier": "general-ledger-082",
       "name": "The mirror item of a change-of-account transfer",
       "document": "docs/domains/general-ledger/calculations.md#change-of-account",
       "purpose": "Computes, per counterpart, currency, source account and analytic distribution, the item that empties the source account, so that the transfer entry balances and the source items can be matched away.",
@@ -8423,7 +8721,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-081",
+      "identifier": "general-ledger-083",
       "name": "The order in which numbers are assigned when several entries are posted at once",
       "document": "docs/domains/general-ledger/calculations.md#27-the-order-in-which-numbers-are-assigned",
       "purpose": "Fixes which entry of a batch consumes which number, so that the numbering follows the accounting dates and not the order in which the entries were selected or created.",
@@ -8557,7 +8855,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-082",
+      "identifier": "general-ledger-084",
       "name": "The date-alignment test of a number against an accounting date",
       "document": "docs/domains/general-ledger/calculations.md#27-the-order-in-which-numbers-are-assigned",
       "purpose": "Decides whether the year, the end year and the month written in a number agree with the period of the accounting date, which is what stops an entry keeping a number of the wrong period.",
@@ -8668,7 +8966,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-083",
+      "identifier": "general-ledger-085",
       "name": "The proposed number shown before posting",
       "document": "docs/domains/general-ledger/calculations.md#28-the-proposed-number-shown-before-posting",
       "purpose": "Shows a draft entry the number it would take, without consuming it, and only in the one situation in which that proposal cannot be wrong.",
@@ -8765,7 +9063,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-084",
+      "identifier": "general-ledger-086",
       "name": "The numbering-holes indicator of a journal",
       "document": "docs/domains/general-ledger/calculations.md#29-numbering-holes-per-journal",
       "purpose": "Reports, per journal, whether an entry still correctable opens a hole in the numbering, so that the accountant is warned only about holes that can still be fixed.",
@@ -8872,7 +9170,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-085",
+      "identifier": "general-ledger-087",
       "name": "The display name of a journal entry",
       "document": "docs/domains/general-ledger/calculations.md#30-the-display-name-of-an-entry",
       "purpose": "Composes the text by which an entry is identified in lists, links and printed documents, including for a draft document that has no number yet.",
@@ -8983,7 +9281,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-086",
+      "identifier": "general-ledger-088",
       "name": "Whether a journal item is tax exigible",
       "document": "docs/domains/general-ledger/calculations.md#31-which-items-are-reportable-for-tax",
       "purpose": "Decides whether an item is reportable in the tax report now rather than at payment time, which is what separates ordinary taxes from taxes exigible on payment.",
@@ -9098,7 +9396,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-087",
+      "identifier": "general-ledger-089",
       "name": "Whether a journal item or a journal entry affects the tax report",
       "document": "docs/domains/general-ledger/calculations.md#32-whether-a-journal-item-affects-the-tax-report",
       "purpose": "Decides whether an item, and therefore its entry, touches the tax report, which is what makes the Tax Return Lock Date apply and what the accounting date rule consults.",
@@ -9222,7 +9520,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-088",
+      "identifier": "general-ledger-090",
       "name": "The number of journal items behind the liquidity journal balance",
       "document": "docs/domains/general-ledger/calculations.md#the-account-driven-balance",
       "purpose": "Counts the items the dashboard balance of a liquidity journal is made of, so that the card can show how many movements sit behind the figure.",
@@ -9306,7 +9604,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-089",
+      "identifier": "general-ledger-091",
       "name": "The running balance of the last statement of a liquidity journal",
       "document": "docs/domains/general-ledger/calculations.md#the-running-balance-of-the-last-statement",
       "purpose": "Gives the balance the bank account has reached according to the last statement plus everything booked after it, which is the second figure the dashboard card of a liquidity journal shows.",
@@ -9408,7 +9706,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-090",
+      "identifier": "general-ledger-092",
       "name": "The outstanding payment accounts of a journal",
       "document": "docs/domains/general-ledger/calculations.md#the-outstanding-accounts",
       "purpose": "Gives the two sets of accounts on which money in transit sits for a journal, which the dashboard card and the payment matching both read.",
@@ -9495,7 +9793,7 @@
       ]
     },
     {
-      "identifier": "general-ledger-091",
+      "identifier": "general-ledger-093",
       "name": "The end-to-end ledger walkthrough",
       "document": "docs/domains/general-ledger/calculations.md#34-worked-end-to-end-example",
       "purpose": "Composes the calculations of the domain over one accounting year of one company, so that a rebuild can check that the opening entry, the numbering, the reversal, the foreign-currency matching, the exchange difference, the locking and the hashing all agree with one another.",
